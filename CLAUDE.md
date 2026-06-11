@@ -66,9 +66,10 @@ never from harder execution. He should never feel punished.
 ## Roadmap
 
 ### M0 — Foundation (do this first)
-1. Refactor src/main.js into modules with ZERO behavior change:
-   src/world.js, src/skeletons.js, src/weapons.js, src/pickups.js,
+1. DONE 2026-06-11. Refactor src/main.js into modules with ZERO behavior
+   change: src/world.js, src/skeletons.js, src/weapons.js, src/pickups.js,
    src/waves.js, src/boss.js, src/audio.js, src/ui.js, src/input.js,
+   src/effects.js (shared explosions, sparks, bone shards, screen shake),
    src/main.js (game loop + state). Verify the game plays identically.
 2. Confirm GitHub Pages deploy works and the game runs on the iPad from
    its URL, added to the home screen.
