@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>SPACE SKELETONS</title>
+<style>
+  html, body {
+    margin: 0; padding: 0; width: 100%; height: 100%;
+    overflow: hidden; background: #1a0301;
+    touch-action: none;
+    -webkit-user-select: none; user-select: none;
+    -webkit-touch-callout: none;
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+  #game-root { position: fixed; inset: 0; }
+  canvas { display: block; }
+
+  /* ---------- VISOR FRAME ---------- */
+  .visor { position: fixed; pointer-events: none; z-index: 5; }
+  .visor-corner {
+    width: 46px; height: 46px;
+    border: 3px solid rgba(77, 243, 255, 0.55);
+  }
+  #vc-tl { top: 10px; left: 10px; border-right: none; border-bottom: none; }
+  #vc-tr { top: 10px; right: 10px; border-left: none; border-bottom: none; }
+  #vc-bl { bottom: 10px; left: 10px; border-right: none; border-top: none; }
+  #vc-br { bottom: 10px; right: 10px; border-left: none; border-top: none; }
+  #visor-tint {
+    position: fixed; inset: 0; pointer-events: none; z-index: 4;
+    background: radial-gradient(ellipse at center,
+      rgba(0,0,0,0) 55%, rgba(10,2,0,0.45) 100%);
+  }
+
+  /* ---------- CROSSHAIR ---------- */
+  #crosshair {
+    position: fixed; left: 50%; top: 50%; width: 44px; height: 44px;
+    transform: translate(-50%, -50%);
+    pointer-events: none; z-index: 6;
+  }
+  #crosshair .ring {
+    position: absolute; inset: 0; border-radius: 50%;
+    border: 2px solid rgba(77, 243, 255, 0.9);
+    transition: border-color 0.08s, transform 0.08s;
+  }
+  #crosshair .dot {
+    position: absolute; left: 50%; top: 50%; width: 5px; height: 5px;
+    background: rgba(77, 243, 255, 0.95); border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: background 0.08s;
+  }
+  #crosshair.locked .ring { border-color: #ff3b30; transform: scale(1.18); }
+  #crosshair.locked .dot { background: #ff3b30; }
+
+  /* ---------- HUD ---------- */
+  .hud { position: fixed; z-index: 7; pointer-events: none; color: #ffe9d0;
+         text-shadow: 0 0 8px rgba(255, 90, 0, 0.6); }
+  #hearts { top: 16px; left: 22px; font-size: 30px; letter-spacing: 4px; }
+  #hearts .h-on  { color: #ff4757; text-shadow: 0 0 10px rgba(255,71,87,0.9); }
+  #hearts .h-off { color: #3a2a28; text-shadow: none; }
+  #score-box { top: 16px; right: 22px; text-align: right; font-size: 18px; }
+  #score-box .best { font-size: 12px; color: #caa052; margin-top: 2px; }
+  #wave-box { top: 16px; left: 50%; transform: translateX(-50%);
+              font-size: 16px; color: #4df3ff; letter-spacing: 3px; }
+  #weapon-pill {
+    bottom: 22px; left: 50%; transform: translateX(-50%);
+    font-size: 14px; letter-spacing: 2px;
+    padding: 8px 18px; border: 2px solid rgba(77,243,255,0.4);
+    border-radius: 999px; background: rgba(10, 3, 1, 0.55);
+    display: flex; align-items: center; gap: 10px;
+  }
+  #weapon-dot { width: 12px; height: 12px; border-radius: 50%;
+                background: #4df3ff; box-shadow: 0 0 10px currentColor; }
+  #weapon-lv { color: #caa052; font-size: 12px; }
+
+  /* ---------- BOSS BAR ---------- */
+  #boss-bar-wrap {
+    position: fixed; top: 52px; left: 50%; transform: translateX(-50%);
+    width: min(70vw, 560px); z-index: 7; pointer-events: none;
+    display: none; text-align: center;
+  }
+  #boss-name { color: #ff5a4d; font-size: 14px; letter-spacing: 4px;
+               margin-bottom: 5px; text-shadow: 0 0 10px rgba(255,40,40,0.8); }
+  #boss-bar-bg {
+    height: 14px; border: 2px solid rgba(255, 80, 60, 0.7);
+    border-radius: 999px; background: rgba(20, 4, 2, 0.7); overflow: hidden;
+  }
+  #boss-bar-fill {
+    height: 100%; width: 100%;
+    background: linear-gradient(90deg, #ff2e2e, #ff7a2a);
+    transition: width 0.12s linear;
+  }
+
+  /* ---------- BANNERS ---------- */
+  #banner {
+    position: fixed; top: 34%; left: 50%; transform: translate(-50%, -50%) scale(0.9);
+    z-index: 8; pointer-events: none; text-align: center;
+    opacity: 0; transition: opacity 0.25s, transform 0.25s;
+  }
+  #banner.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  #banner .main {
+    font-size: clamp(30px, 7vw, 58px); font-weight: 800; letter-spacing: 6px;
+    color: #ffd34d; text-shadow: 0 0 18px rgba(255, 122, 42, 0.9),
+                                 0 4px 0 rgba(80, 20, 0, 0.8);
+  }
+  #banner .sub {
+    font-size: clamp(13px, 2.5vw, 18px); letter-spacing: 4px;
+    color: #4df3ff; margin-top: 8px;
+  }
+  #banner.danger .main { color: #ff3b30;
+    text-shadow: 0 0 22px rgba(255, 30, 30, 0.95), 0 4px 0 rgba(60, 0, 0, 0.9); }
+
+  /* ---------- FLASH / DAMAGE ---------- */
+  #dmg-vignette, #red-flash {
+    position: fixed; inset: 0; pointer-events: none; opacity: 0;
+  }
+  #dmg-vignette {
+    z-index: 9;
+    background: radial-gradient(ellipse at center,
+      rgba(255,0,0,0) 45%, rgba(255, 20, 10, 0.55) 100%);
+  }
+  #red-flash { z-index: 9; background: rgba(180, 0, 0, 0.35); }
+
+  /* ---------- SCORE POPUPS ---------- */
+  .pop {
+    position: fixed; z-index: 7; pointer-events: none;
+    color: #ffd34d; font-weight: 700; font-size: 18px;
+    text-shadow: 0 0 8px rgba(255, 160, 40, 0.9);
+    opacity: 0; transform: translate(-50%, -50%);
+    transition: opacity 0.15s;
+  }
+  .pop.live { opacity: 1; animation: rise 0.8s ease-out forwards; }
+  @keyframes rise {
+    from { margin-top: 0; opacity: 1; }
+    to   { margin-top: -46px; opacity: 0; }
+  }
+
+  /* ---------- SCREENS ---------- */
+  .screen {
+    position: fixed; inset: 0; z-index: 20;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; color: #ffe9d0;
+    background: radial-gradient(ellipse at 50% 65%,
+      rgba(80, 18, 0, 0.55) 0%, rgba(12, 2, 0, 0.88) 70%);
+  }
+  .screen .title {
+    font-size: clamp(40px, 10vw, 84px); font-weight: 900; letter-spacing: 8px;
+    line-height: 1.05; color: #ffd34d;
+    text-shadow: 0 0 26px rgba(255, 110, 30, 0.9), 0 6px 0 rgba(70, 15, 0, 0.9);
+  }
+  .screen .skulls { font-size: clamp(28px, 6vw, 44px); margin: 14px 0 6px; letter-spacing: 14px; }
+  .screen .tag { color: #4df3ff; letter-spacing: 3px;
+                 font-size: clamp(13px, 2.6vw, 17px); margin-top: 10px; }
+  .screen .how {
+    margin-top: 26px; font-size: clamp(12px, 2.4vw, 15px); line-height: 2;
+    color: #f3c9a6; letter-spacing: 1px;
+  }
+  .screen .go {
+    margin-top: 30px; font-size: clamp(15px, 3vw, 20px); letter-spacing: 4px;
+    color: #ffffff; padding: 14px 30px;
+    border: 2px solid #ff7a2a; border-radius: 999px;
+    background: rgba(255, 90, 0, 0.18);
+    box-shadow: 0 0 22px rgba(255, 110, 30, 0.5);
+    animation: pulse 1.4s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100% { transform: scale(1);} 50% { transform: scale(1.06);} }
+  .screen .stat { font-size: clamp(16px, 3.4vw, 24px); margin-top: 14px; color: #ffd34d; }
+  #screen-over, #screen-pause { display: none; }
+  #hint {
+    position: fixed; bottom: 78px; left: 50%; transform: translateX(-50%);
+    z-index: 7; pointer-events: none; color: #4df3ff; letter-spacing: 3px;
+    font-size: 13px; opacity: 0; transition: opacity 0.4s;
+    text-shadow: 0 0 10px rgba(77, 243, 255, 0.8);
+  }
+  #hint.show { opacity: 1; }
+</style>
+</head>
+<body>
+<div id="game-root"></div>
+
+<!-- visor frame -->
+<div class="visor visor-corner" id="vc-tl"></div>
+<div class="visor visor-corner" id="vc-tr"></div>
+<div class="visor visor-corner" id="vc-bl"></div>
+<div class="visor visor-corner" id="vc-br"></div>
+<div id="visor-tint"></div>
+
+<!-- crosshair -->
+<div id="crosshair"><div class="ring"></div><div class="dot"></div></div>
+
+<!-- HUD -->
+<div class="hud" id="hearts"></div>
+<div class="hud" id="score-box">
+  <div>SCORE <span id="score-val">0</span></div>
+  <div class="best">BEST <span id="best-val">0</span></div>
+</div>
+<div class="hud" id="wave-box">WAVE 1</div>
+<div class="hud" id="weapon-pill"><span id="weapon-dot"></span><span id="weapon-name">LASER BLASTER</span><span id="weapon-lv">LV 1</span></div>
+
+<!-- boss bar -->
+<div id="boss-bar-wrap">
+  <div id="boss-name">CAPTAIN BLAZEBONES</div>
+  <div id="boss-bar-bg"><div id="boss-bar-fill"></div></div>
+</div>
+
+<!-- banner + flashes -->
+<div id="banner"><div class="main"></div><div class="sub"></div></div>
+<div id="dmg-vignette"></div>
+<div id="red-flash"></div>
+<div id="hint">DRAG TO AIM. YOUR BLASTER FIRES BY ITSELF.</div>
+
+<!-- screens -->
+<div class="screen" id="screen-menu">
+  <div class="skulls">&#128128; &#129302; &#128128;</div>
+  <div class="title">SPACE<br>SKELETONS</div>
+  <div class="tag">ROBOT PILOT VS THE SKELETON PIRATES OF THE LAVA PLANET</div>
+  <div class="how">
+    DRAG TO AIM &middot; BLASTER FIRES BY ITSELF<br>
+    CRATES UPGRADE YOUR BLASTER &middot; HEARTS HEAL YOU<br>
+    BIG BOSS EVERY 5 WAVES
+  </div>
+  <div class="go">TAP TO LAUNCH</div>
+</div>
+
+<div class="screen" id="screen-over">
+  <div class="skulls">&#128128; &#128128; &#128128;</div>
+  <div class="title" style="font-size:clamp(30px,8vw,62px);">ROBOT DOWN!</div>
+  <div class="stat">SCORE <span id="over-score">0</span></div>
+  <div class="stat" style="color:#4df3ff;">BEST <span id="over-best">0</span></div>
+  <div class="go">TAP TO FLY AGAIN</div>
+</div>
+
+<div class="screen" id="screen-pause">
+  <div class="title" style="font-size:clamp(28px,7vw,54px);">PAUSED</div>
+  <div class="go">TAP TO KEEP FLYING</div>
+</div>
+
+<script type="module" src="/src/main.js"></script>
+</body>
+</html>
