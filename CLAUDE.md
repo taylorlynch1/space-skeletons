@@ -28,6 +28,9 @@ never from harder execution. He should never feel punished.
    Never leave it broken between sessions.
 6. After any code change: run `npm run dev`, play at least 2 waves, and
    confirm 60fps feel before calling a task done.
+7. Effort policy: use ultracode for milestone implementation tasks. Drop
+   to high effort for housekeeping, deploy watching, and small fixes.
+   Re-set each session since effort is session-only.
 
 ## Locked design facts (do not change without Taylor's explicit sign-off)
 
@@ -71,8 +74,12 @@ never from harder execution. He should never feel punished.
    src/waves.js, src/boss.js, src/audio.js, src/ui.js, src/input.js,
    src/effects.js (shared explosions, sparks, bone shards, screen shake),
    src/main.js (game loop + state). Verify the game plays identically.
-2. Confirm GitHub Pages deploy works and the game runs on the iPad from
-   its URL, added to the home screen.
+2. Deploy confirmed live 2026-06-11 at
+   https://taylorlynch1.github.io/space-skeletons/ (Pages had to be
+   enabled in repo settings, then the failed Actions run was re-run).
+   Verified in browser: title screen, gameplay, no console errors.
+   REMAINING: Taylor confirms it runs on the iPad and adds it to the
+   home screen.
 
 ### M1 — Tier A (feel and reward)
 1. Combo multiplier: kill chain without taking a hit, x2 x3 x4 score,
