@@ -24,7 +24,7 @@ export function spawnBoss() {
     baseY: 8.4, t: 0, entering: true,
     attackT: 2.5, attackRate: Math.max(1.4, 2.5 - tier * 0.15),
     pattern: 0, summoned: false, roarT: 4, jawT: 0, beatT: 1.0,
-    shotQueue: []
+    swayT: 0, shotQueue: []
   };
   ctx.boss.group.position.set(0, ctx.boss.baseY, -150);
   ctx.scene.add(ctx.boss.group);
@@ -77,7 +77,10 @@ export function updateBoss(dt) {
     return;
   }
 
-  g.position.x = Math.sin(boss.t * 0.55) * 14;
+  // sway clock starts at arrival so x begins at 0 (no sideways snap)
+  // and the amplitude eases in over the first 1.5 seconds
+  boss.swayT += dt;
+  g.position.x = Math.sin(boss.swayT * 0.55) * 14 * Math.min(1, boss.swayT / 1.5);
   g.lookAt(ctx.PLAYER_POS.x, g.position.y, ctx.PLAYER_POS.z);
   boss.parts.armR.rotation.x = -2.2 + Math.sin(boss.t * 2.2) * 0.35;
 

@@ -48,6 +48,11 @@ export var sfx = {
   triple: function () { tone(760, 280, 0.12, "square", 0.4); },
   plasma: function () { tone(260, 60, 0.3, "sawtooth", 0.55);
                         tone(520, 120, 0.2, "square", 0.28, 0.02); },
+  /* Plasma Cannon: punchy layered zap, sharp attack, fast fall */
+  zap: function () { noiseHit(0.05, 0.35, 4200, 0);
+                     tone(1900, 240, 0.11, "square", 0.5);
+                     tone(950, 130, 0.16, "sawtooth", 0.45);
+                     tone(3400, 900, 0.06, "sine", 0.22); },
   enemyShot: function () { tone(380, 130, 0.18, "sawtooth", 0.32); },
   sniperShot: function () { tone(980, 240, 0.16, "sawtooth", 0.32); },
   boom: function (p) {

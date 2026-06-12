@@ -17,11 +17,18 @@ export var TIERS = [
   { name: "TWIN LASER",     css: "#9af6ff", color: 0x9af6ff,
     rate: 0.15, dmg: 1, speed: 175, size: 0.28, count: 2, spread: 0.035, splash: 0 },
   { name: "TRIPLE BLASTER", css: "#ffd34d", color: 0xffd34d,
-    rate: 0.24, dmg: 1, speed: 165, size: 0.28, count: 3, spread: 0.07,  splash: 0 },
-  { name: "PLASMA CANNON",  css: "#7cff6b", color: 0x9dffa0,
-    rate: 0.42, dmg: 5, speed: 130, size: 0.55, count: 1, spread: 0,     splash: 6 },
+    rate: 0.14, dmg: 1, speed: 165, size: 0.28, count: 3, spread: 0, tri: true,  splash: 0 },
+  { name: "PLASMA CANNON",  css: "#7cff6b", color: 0xc8ffc0,
+    rate: 0.42, dmg: 5, speed: 130, size: 0.55, count: 1, spread: 0, beam: true, splash: 6 },
   { name: "PLASMA STORM",   css: "#c8ff5e", color: 0xc8ff5e,
     rate: 0.50, dmg: 4, speed: 125, size: 0.50, count: 3, spread: 0.09,  splash: 5 }
+];
+
+/* Triple Blaster triangle: one bolt high, two low (h yaw, v pitch, rad) */
+var TRI_OFFSETS = [
+  { h: 0,     v: 0.05 },
+  { h: -0.06, v: -0.035 },
+  { h: 0.06,  v: -0.035 }
 ];
 
 export function maxTierForWave(w) {
@@ -175,15 +182,22 @@ export function fireWeapon() {
   ctx.camera.updateMatrixWorld(true);
   var target = acquireAimPoint();
   var up = new THREE.Vector3(0, 1, 0).applyQuaternion(ctx.camera.quaternion);
+  var right = new THREE.Vector3(1, 0, 0).applyQuaternion(ctx.camera.quaternion);
   var muzzle = new THREE.Vector3();
   cannonTipMesh.getWorldPosition(muzzle);
   var baseDir = target.clone().sub(muzzle).normalize();
 
   for (var c = 0; c < ctx.weapon.count; c++) {
     var b = getFree(bullets); if (!b) break;
-    var ang = (c - (ctx.weapon.count - 1) / 2) * ctx.weapon.spread;
     var dir = baseDir.clone();
-    if (ang !== 0) dir.applyAxisAngle(up, ang);
+    if (ctx.weapon.tri) {
+      var o = TRI_OFFSETS[c];
+      if (o.h !== 0) dir.applyAxisAngle(up, o.h);
+      if (o.v !== 0) dir.applyAxisAngle(right, o.v);
+    } else {
+      var ang = (c - (ctx.weapon.count - 1) / 2) * ctx.weapon.spread;
+      if (ang !== 0) dir.applyAxisAngle(up, ang);
+    }
     b.active = true;
     b.dmg = ctx.weapon.dmg; b.splash = ctx.weapon.splash; b.r = ctx.weapon.size;
     b.mesh.material = b.mats[ctx.weaponTier];
@@ -192,13 +206,18 @@ export function fireWeapon() {
     b.vel.copy(dir).multiplyScalar(ctx.weapon.speed);
     ctx.tmpV2.copy(muzzle).add(dir);
     b.mesh.lookAt(ctx.tmpV2);
-    b.mesh.scale.set(ctx.weapon.size, ctx.weapon.size, ctx.weapon.size * 3.0);
+    if (ctx.weapon.beam) {
+      // thin bright streak; collision radius b.r stays at full size
+      b.mesh.scale.set(ctx.weapon.size * 0.6, ctx.weapon.size * 0.6, ctx.weapon.size * 7.5);
+    } else {
+      b.mesh.scale.set(ctx.weapon.size, ctx.weapon.size, ctx.weapon.size * 3.0);
+    }
   }
   recoil = 0.14;
   muzzleFlash.material.opacity = 0.9;
   muzzleFlash.material.color.setHex(ctx.weapon.color);
   if (ctx.weaponTier === 4) sfx.plasma();
-  else if (ctx.weaponTier === 3) sfx.plasma();
+  else if (ctx.weaponTier === 3) sfx.zap();
   else if (ctx.weaponTier === 2) sfx.triple();
   else if (ctx.weaponTier === 1) sfx.twin();
   else sfx.laser();
