@@ -31,6 +31,14 @@ never from harder execution. He should never feel punished.
 7. Effort policy: use ultracode for milestone implementation tasks. Drop
    to high effort for housekeeping, deploy watching, and small fixes.
    Re-set each session since effort is session-only.
+8. Verification economy: Taylor does routine visual playtesting himself.
+   Do not use browser tooling for routine visual checks. Console checks
+   happen at exactly two moments: (a) once at the end of each milestone
+   before the final commit, and (b) when the game plays fine but a change
+   seems to have had no effect or something feels off, since that pattern
+   means a silent failure. Browser tooling is reserved for those console
+   checks, bugs Taylor cannot reproduce or describe, and performance
+   profiling.
 
 ## Locked design facts (do not change without Taylor's explicit sign-off)
 
