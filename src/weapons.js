@@ -26,9 +26,9 @@ export var TIERS = [
 
 /* Triple Blaster triangle: one bolt high, two low (h yaw, v pitch, rad) */
 var TRI_OFFSETS = [
-  { h: 0,     v: 0.05 },
-  { h: -0.06, v: -0.035 },
-  { h: 0.06,  v: -0.035 }
+  { h: 0,     v: 0.032 },
+  { h: -0.04, v: -0.022 },
+  { h: 0.04,  v: -0.022 }
 ];
 
 export function maxTierForWave(w) {
