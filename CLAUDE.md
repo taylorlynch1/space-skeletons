@@ -51,6 +51,9 @@ never from harder execution. He should never feel punished.
   SKULLSWORD, DREAD KING MARROW, THE BONE EMPEROR.
 - Enemy roster: Slasher (wave 1+), Gunner (wave 2+), Brute (wave 6+,
   eyepatch, iron plate, 30 pts), Sniper (wave 8+, purple bolts, 25 pts).
+- Ladder monotonicity: every weapon tier must fire at least as fast
+  as, and look and sound at least as powerful as, the tier below it.
+  Any tier change gets checked against this before commit.
 - Skeleton kills play a randomized funny sound (bone xylophone, cartoon
   boing, or slide whistle). This is beloved. Keep it.
 - Controls: drag to aim on touch, mouse position on desktop, auto-fire,

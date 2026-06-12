@@ -53,6 +53,13 @@ export var sfx = {
                      tone(1900, 240, 0.11, "square", 0.5);
                      tone(950, 130, 0.16, "sawtooth", 0.45);
                      tone(3400, 900, 0.06, "sine", 0.22); },
+  /* Plasma Storm: the cannon zap pitched bigger and meaner, with a
+     sub layer so the top tier sounds like the top tier */
+  stormZap: function () { noiseHit(0.07, 0.4, 3600, 0);
+                          tone(1400, 160, 0.14, "square", 0.55);
+                          tone(640, 90, 0.22, "sawtooth", 0.5);
+                          tone(140, 50, 0.3, "sine", 0.45, 0.02);
+                          tone(2600, 600, 0.07, "sine", 0.25); },
   enemyShot: function () { tone(380, 130, 0.18, "sawtooth", 0.32); },
   sniperShot: function () { tone(980, 240, 0.16, "sawtooth", 0.32); },
   boom: function (p) {

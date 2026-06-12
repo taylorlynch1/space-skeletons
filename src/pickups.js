@@ -86,23 +86,23 @@ function makeMiniBlaster(color) {
   return g;
 }
 
-/* heater shield: plate on top, pyramid point below, bright stud */
+/* round shield: disc face, raised rim, center boss; the group is
+   billboarded in updatePickups so the silhouette never collapses to
+   an edge */
 function makeShieldIcon() {
   var g = new THREE.Group();
   var blue = new THREE.MeshPhongMaterial({ color: 0x2f6fdd, emissive: 0x1a3f8f,
     emissiveIntensity: 0.5, flatShading: true, shininess: 6 });
-  var plate = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.62, 0.14), blue);
-  plate.position.y = 0.18;
-  g.add(plate);
-  var point = new THREE.Mesh(new THREE.ConeGeometry(0.51, 0.55, 4), blue);
-  point.rotation.x = Math.PI;
-  point.rotation.y = Math.PI / 4;
-  point.position.y = -0.36;
-  g.add(point);
-  var stud = new THREE.Mesh(new THREE.SphereGeometry(0.12, 8, 8),
-    new THREE.MeshBasicMaterial({ color: 0x9fd4ff }));
-  stud.position.set(0, 0.05, 0.1);
-  g.add(stud);
+  var bright = new THREE.MeshBasicMaterial({ color: 0x9fd4ff });
+  var face = new THREE.Mesh(new THREE.CylinderGeometry(0.6, 0.6, 0.1, 20), blue);
+  face.rotation.x = Math.PI / 2;
+  g.add(face);
+  var rim = new THREE.Mesh(new THREE.TorusGeometry(0.6, 0.07, 8, 20), bright);
+  rim.position.z = 0.05;
+  g.add(rim);
+  var boss = new THREE.Mesh(new THREE.SphereGeometry(0.16, 10, 8), bright);
+  boss.position.z = 0.12;
+  g.add(boss);
   return g;
 }
 
@@ -164,9 +164,14 @@ export function updatePickups(dt) {
   for (var i = 0; i < pickups.length; i++) {
     var p = pickups[i];
     p.t += dt;
-    p.group.rotation.y += dt * 2.2;
-    if (p.kind === "weapon") p.group.rotation.x += dt * 1.1;
-    else {
+    if (p.kind === "shield") {
+      // billboard: the disc always faces the player
+      p.group.lookAt(ctx.PLAYER_POS);
+    } else {
+      p.group.rotation.y += dt * 2.2;
+      if (p.kind === "weapon") p.group.rotation.x += dt * 1.1;
+    }
+    if (p.kind !== "weapon") {
       var ps = 1 + Math.sin(p.t * 5) * 0.12;
       p.group.scale.setScalar(p.baseScale * ps);
     }

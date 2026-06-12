@@ -21,7 +21,7 @@ export var TIERS = [
   { name: "PLASMA CANNON",  css: "#7cff6b", color: 0xc8ffc0,
     rate: 0.42, dmg: 5, speed: 130, size: 0.55, count: 1, spread: 0, beam: true, splash: 6 },
   { name: "PLASMA STORM",   css: "#c8ff5e", color: 0xc8ff5e,
-    rate: 0.50, dmg: 4, speed: 125, size: 0.50, count: 3, spread: 0.09,  splash: 5 }
+    rate: 0.32, dmg: 4, speed: 125, size: 0.50, count: 3, spread: 0, tri: true, beam: true, splash: 5 }
 ];
 
 /* Triple Blaster triangle: one bolt high, two low (h yaw, v pitch, rad) */
@@ -294,7 +294,7 @@ export function fireWeapon() {
   recoil = 0.14;
   muzzleFlash.material.opacity = 0.9;
   muzzleFlash.material.color.setHex(ctx.weapon.color);
-  if (ctx.weaponTier === 4) sfx.plasma();
+  if (ctx.weaponTier === 4) sfx.stormZap();
   else if (ctx.weaponTier === 3) sfx.zap();
   else if (ctx.weaponTier === 2) sfx.triple();
   else if (ctx.weaponTier === 1) sfx.twin();
