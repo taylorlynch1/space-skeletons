@@ -90,8 +90,11 @@ never from harder execution. He should never feel punished.
    home screen.
 
 ### M1 — Tier A (feel and reward)
-1. Combo multiplier: kill chain without taking a hit, x2 x3 x4 score,
-   on-screen meter, resets on damage.
+1. DONE 2026-06-11. Combo multiplier: kill chain without taking a hit,
+   x2 x3 x4 score, on-screen meter, resets on damage. Thresholds
+   5/10/15 kills, no decay (tunable, see docs/m1-integration-map.md
+   section 6.11). Applies to enemy and boss kills only; +5 bolt and
+   +150 crate awards stay unmultiplied.
 2. SUPER BLAST: kills charge a meter, big tappable button when full,
    screen-clearing beam. Spend-or-save decision.
 3. Shield pickup: blue bubble, absorbs one hit, third pickup type.

@@ -26,6 +26,7 @@ import { initBoss, updateBoss } from "./boss.js";
 import { initPickups, updatePickups, clearPickups } from "./pickups.js";
 import { initWaves, updateWaveFlow } from "./waves.js";
 import { initInput } from "./input.js";
+import { initCombo, comboReset } from "./combo.js";
 
 /* ---------------- CORE STATE ---------------- */
 var ctx = {
@@ -38,6 +39,7 @@ var ctx = {
   score: 0, best: 0, hearts: 3, wave: 0,
   MAX_HEARTS: 5,   // start with 3, earn up to 5
   kills: 0, killsSincePickup: 0, pickupFlip: false,
+  comboChain: 0, comboMult: 1, comboFrac: 0,
   invulnT: 0, dmgFade: 0, flashFade: 0,
   shakeT: 0, shakeAmp: 0,
   pendingNextWaveAt: null,
@@ -69,6 +71,7 @@ var ctx = {
 function damagePlayer() {
   if (ctx.invulnT > 0 || ctx.state !== "PLAYING") return;
   ctx.hearts--;
+  comboReset();
   ctx.invulnT = 1.3;
   ctx.dmgFade = 1.0;
   shake(0.7, 0.5);
@@ -97,6 +100,7 @@ function resetGame() {
   ctx.invulnT = 0; ctx.dmgFade = 0; ctx.flashFade = 0; ctx.fireT = 0;
   ctx.aimX = 0; ctx.aimY = 0;
   setWeaponTier(0);
+  comboReset();
   updateHearts(); updateScore();
   elWave.textContent = "WAVE 1";
   ctx.pendingNextWaveAt = ctx.elapsed + 0.9;
@@ -178,6 +182,7 @@ ctx.damagePlayer = damagePlayer;
 ctx.startPlaying = startPlaying;
 
 initUI(ctx);
+initCombo(ctx);
 initThree(ctx);
 initSkeletons(ctx);
 buildSharedParts();

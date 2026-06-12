@@ -6,6 +6,7 @@ import { fireBolt, fireBoltDir, boltMatRed } from "./weapons.js";
 import { showBanner, updateScore, scorePop, elBossWrap, elBossName, elBossFill } from "./ui.js";
 import { spawnSpark, spawnBones, shake } from "./effects.js";
 import { spawnWeaponCrate, spawnHeart } from "./pickups.js";
+import { comboKill } from "./combo.js";
 
 var ctx;
 
@@ -141,7 +142,8 @@ export function hitBoss(dmg, atPos) {
 export function killBoss() {
   var boss = ctx.boss;
   var pos = boss.group.position.clone(); pos.y += 6;
-  var pts = 300 * boss.tier;
+  comboKill();
+  var pts = 300 * boss.tier * ctx.comboMult;
   ctx.score += pts; updateScore();
   scorePop(pos, "+" + pts, true);
   for (var i = 0; i < 5; i++) {

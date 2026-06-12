@@ -183,3 +183,9 @@ and ownership boundaries are stable.
    or animated UI must copy it, never hold the reference.
 10. New timers must accumulate dt from animate (frozen while PAUSED),
     not wall-clock time (iPad backgrounding).
+11. Combo chain has no decay BY DESIGN (Taylor, 2026-06-11): a clean
+    player sits at x4 permanently from mid-game on. Intentional and
+    kid-friendly. TUNABLE if playtesting shows x4 feels like the
+    default instead of an achievement: raise THRESHOLDS in
+    src/combo.js (currently 5/10/15) or add a slow decay, with
+    Taylor's sign-off.

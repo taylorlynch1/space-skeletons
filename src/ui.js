@@ -3,6 +3,7 @@ var ctx;
 
 export var $ = function (id) { return document.getElementById(id); };
 export var elHearts, elScore, elBest;
+export var elComboWrap, elComboLabel, elComboFill;
 export var elWave, elWeaponName, elWeaponDot, elWeaponLv;
 export var elBossWrap, elBossName, elBossFill;
 export var elBanner, elBannerMain, elBannerSub;
@@ -15,6 +16,8 @@ var pops = [];
 export function initUI(c) {
   ctx = c;
   elHearts = $("hearts"); elScore = $("score-val"); elBest = $("best-val");
+  elComboWrap = $("combo-wrap"); elComboLabel = $("combo-label");
+  elComboFill = $("combo-bar-fill");
   elWave = $("wave-box"); elWeaponName = $("weapon-name");
   elWeaponDot = $("weapon-dot"); elWeaponLv = $("weapon-lv");
   elBossWrap = $("boss-bar-wrap"); elBossName = $("boss-name"); elBossFill = $("boss-bar-fill");
@@ -41,6 +44,21 @@ export function updateHearts() {
 export function updateScore() {
   elScore.textContent = ctx.score;
   if (ctx.score > ctx.best) { ctx.best = ctx.score; elBest.textContent = ctx.best; }
+}
+
+export function updateCombo(pulse) {
+  if (ctx.comboMult >= 2) {
+    elComboWrap.style.display = "block";
+    elComboLabel.textContent = "COMBO x" + ctx.comboMult;
+    elComboFill.style.width = Math.round(ctx.comboFrac * 100) + "%";
+    if (pulse) {
+      elComboWrap.classList.remove("bump");
+      void elComboWrap.offsetWidth;
+      elComboWrap.classList.add("bump");
+    }
+  } else {
+    elComboWrap.style.display = "none";
+  }
 }
 
 export function showBanner(main, sub, danger) {

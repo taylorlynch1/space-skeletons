@@ -85,5 +85,12 @@ export var sfx = {
   heartbeat: function () { tone(58, 50, 0.1, "sine", 0.3);
                            tone(52, 46, 0.12, "sine", 0.26, 0.16); },
   waveUp: function () { tone(520, 820, 0.14, "sine", 0.35); },
+  /* rising triad, pitched higher per combo tier (lv 2, 3, 4) */
+  comboUp: function (lv) {
+    var b = 520 * Math.pow(1.26, lv - 2);
+    tone(b, b, 0.08, "sine", 0.4);
+    tone(b * 1.25, b * 1.25, 0.08, "sine", 0.4, 0.07);
+    tone(b * 1.5, b * 1.5, 0.12, "sine", 0.45, 0.14);
+  },
   bossDie:function () { sfx.bigBoom(); tone(520, 60, 1.2, "sawtooth", 0.5, 0.2); }
 };

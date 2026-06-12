@@ -4,6 +4,7 @@ import { sfx } from "./audio.js";
 import { spawnExplosion, spawnBones } from "./effects.js";
 import { updateScore, scorePop } from "./ui.js";
 import { spawnAutoPickup } from "./pickups.js";
+import { comboKill } from "./combo.js";
 import { fireBolt, boltMatPurple } from "./weapons.js";
 
 var ctx;
@@ -342,8 +343,10 @@ export function killEnemy(e, scored) {
   sfx.boom(0.6);
   sfx.bonk();
   if (scored) {
-    ctx.score += e.pts; updateScore();
-    scorePop(ctx.tmpV, "+" + e.pts, false);
+    comboKill();
+    var pts = e.pts * ctx.comboMult;
+    ctx.score += pts; updateScore();
+    scorePop(ctx.tmpV, "+" + pts, false);
     ctx.kills++; ctx.killsSincePickup++;
     if (ctx.killsSincePickup >= 9) { ctx.killsSincePickup = 0; spawnAutoPickup(); }
   }
