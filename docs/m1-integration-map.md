@@ -38,7 +38,7 @@ and ownership boundaries are stable.
    - boss.js:145, boss kill, `+300 * tier`
    - pickups.js:110, weapon crate at tier cap, `+150` (locked fact),
      banner "MAX POWER!" at 112, no scorePop
-   - pickups.js, shield collected while already shielded, `+150`,
+   - pickups.js, shield collected while already armed, `+150`,
      banner "SHIELD FULL!", no scorePop, unmultiplied (M1 item 3)
 6. Funny kill sound: `sfx.bonk()` audio.js:62-76, three randomized
    variants (xylophone, boing, slide whistle). Beloved, locked.
@@ -68,14 +68,16 @@ and ownership boundaries are stable.
    i-frames at main.js:171.
 4. `gameOver()` main.js:105-113, called only from damagePlayer. Sets
    state OVER, fills over-score/over-best, shows screen-over.
-5. Shield gate (M1 item 3, approved 2026-06-12): damagePlayer checks
-   ctx.shielded AFTER the invuln guard and BEFORE hearts--. A shielded
-   hit consumes the shield, grants 0.9s invuln, plays sfx.shieldBreak
-   plus a blue flash (ctx.shieldFade), does NOT reset the combo, does
-   NOT set hurtT or dmgFade, and returns. The got-hit cues stay
-   exclusive to real damage. Auto pickup rotation is now a 3-slot
-   cycle (ctx.pickupCycle replaced ctx.pickupFlip): crate, shield if
-   unshielded, heart if hurt, crate as every fallback.
+5. Shield bubble (M1 item 3, revised to an active ability 2026-06-12
+   after iPad playtest): a shield pickup ARMS one stored charge
+   (ctx.shieldArmed, max one, extras pay +150). The armed button left
+   of SUPER BLAST starts a timed invincibility bubble: damagePlayer
+   early-returns while ctx.shieldT > 0, blocking bolts AND melee, so
+   the combo cannot break during it. No consume-on-hit, no got-hit
+   cues; got-hit cues stay exclusive to real damage. Tunables in
+   src/shield.js: SHIELD_DURATION 6.0, WARN_TIME 1.5. Auto pickup
+   rotation is a 3-slot cycle (ctx.pickupCycle): crate, shield if
+   unarmed, heart if hurt, crate as every fallback.
 
 ## 3. HUD and UI conventions
 
@@ -102,9 +104,11 @@ and ownership boundaries are stable.
 5. Anchored positions: hearts top 16 left 22, score box top 16 right 22,
    wave box top center, weapon pill bottom 22 center, boss bar top 52
    center (display none unless boss), hint bottom 78 center (transient).
-   FREE spots for new HUD: above the weapon pill bottom-center is the
-   last one left. The combo meter took under the score box top-right
-   and the shield chip took under hearts top-left.
+   FREE spots for new HUD: under hearts top-left and above the weapon
+   pill bottom-center. The combo meter took under the score box
+   top-right. The bottom-right is the button cluster: SUPER BLAST at
+   right 60 and the shield bubble at right 162, both bottom 112, 88px;
+   new buttons continue leftward.
 6. The only meter pattern is the boss bar: outer #boss-bar-bg (14px,
    border, radius 999px, overflow hidden) + inner #boss-bar-fill driven
    by `style.width = pct + "%"` with a 0.12s width transition
@@ -222,8 +226,24 @@ and ownership boundaries are stable.
     designed to be chased. Item 4's plan MUST decide whether the
     Golden Skeleton is blast-immune (for example it flees or despawns
     instead of dying) before merge.
-14. Medals (M1 item 5) vs shield: medals are graded by hits taken.
-    Item 5's plan MUST decide whether a shielded hit counts as a hit
-    taken for the medal grade. A shielded hit does not call comboReset
-    and leaves hurtT and dmgFade untouched, so if medals key off any
-    of those signals a shielded hit is invisible to them today.
+14. Medals (M1 item 5) vs shield bubble: medals are graded by hits
+    taken. Item 5's plan MUST decide whether damage blocked by an
+    active bubble counts as a hit taken. Blocked hits never reach
+    comboReset, hurtT, or dmgFade (damagePlayer early-returns on
+    ctx.shieldT > 0), so if medals key off any of those signals a
+    blocked hit is invisible to them today.
+15. Aim assist (revised 2026-06-12): capture is by perpendicular
+    world-space distance from the crosshair ray, ASSIST_R_NEAR 7
+    tapering to zero at ASSIST_FAR 220 depth (raised from 140 in
+    review: gunner sway is 6 units, so the hold radius at parked
+    depths must exceed it or the lock flickers), held-target stickiness
+    ASSIST_STICKY 1.35, rival steal threshold ASSIST_STEAL 0.7, boss
+    flat radius BOSS_ASSIST_R 8. One acquireAssist() in weapons.js
+    drives bullets and the crosshair lock; resetAim() is called from
+    resetGame because ctx.enemies is emptied without setting remove
+    flags. Golden Skeleton (fast, fleeing) tuning should start here.
+16. Pickup spawns (revised 2026-06-12): all spawns route through a
+    dt-driven queue in pickups.js, staggered SPAWN_GAP 0.45s apart,
+    placed at least MIN_SPACING 7 units from live pickups (8 tries,
+    farthest fallback), scaled by PICKUP_SCALE 0.7 with the heart
+    pulse multiplying baseScale. Collection radius is unchanged.

@@ -86,7 +86,11 @@ export var sfx = {
   shieldUp: function () { tone(420, 700, 0.09, "sine", 0.4);
                           tone(560, 900, 0.09, "sine", 0.4, 0.08);
                           tone(700, 1200, 0.14, "sine", 0.42, 0.16); },
-  /* bubble pop and fizzle, friendly not punishing */
+  /* bubble activate: big wet rising whoosh */
+  shieldOn: function () { tone(180, 720, 0.3, "sine", 0.5);
+                          tone(360, 1100, 0.25, "sine", 0.35, 0.05);
+                          noiseHit(0.18, 0.2, 1400, 0); },
+  /* bubble expires: pop and fizzle, friendly not punishing */
   shieldBreak: function () { tone(900, 240, 0.08, "square", 0.45);
                              noiseHit(0.25, 0.4, 3200, 0.02);
                              tone(500, 120, 0.18, "sine", 0.35, 0.06); },

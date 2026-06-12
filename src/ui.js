@@ -5,7 +5,7 @@ export var $ = function (id) { return document.getElementById(id); };
 export var elHearts, elScore, elBest;
 export var elComboWrap, elComboLabel, elComboFill;
 export var elSuperBtn, elSuperRing, elSuperFlash;
-export var elShieldChip, elShieldGlow, elShieldFlash;
+export var elShieldBtn, elShieldRing, elShieldGlow, elShieldFlash;
 export var elWave, elWeaponName, elWeaponDot, elWeaponLv;
 export var elBossWrap, elBossName, elBossFill;
 export var elBanner, elBannerMain, elBannerSub;
@@ -22,8 +22,8 @@ export function initUI(c) {
   elComboFill = $("combo-bar-fill");
   elSuperBtn = $("super-btn"); elSuperRing = $("super-ring");
   elSuperFlash = $("super-flash");
-  elShieldChip = $("shield-chip"); elShieldGlow = $("shield-glow");
-  elShieldFlash = $("shield-flash");
+  elShieldBtn = $("shield-btn"); elShieldRing = $("shield-ring");
+  elShieldGlow = $("shield-glow"); elShieldFlash = $("shield-flash");
   elWave = $("wave-box"); elWeaponName = $("weapon-name");
   elWeaponDot = $("weapon-dot"); elWeaponLv = $("weapon-lv");
   elBossWrap = $("boss-bar-wrap"); elBossName = $("boss-name"); elBossFill = $("boss-bar-fill");
@@ -65,11 +65,6 @@ export function updateCombo(pulse) {
   } else {
     elComboWrap.style.display = "none";
   }
-}
-
-export function updateShield() {
-  elShieldChip.style.display = ctx.shielded ? "block" : "none";
-  elShieldGlow.style.opacity = ctx.shielded ? 1 : 0;
 }
 
 export function showBanner(main, sub, danger) {

@@ -63,21 +63,44 @@
   #score-box { top: 16px; right: 22px; text-align: right; font-size: 18px; }
   #score-box .best { font-size: 12px; color: #caa052; margin-top: 2px; }
 
-  /* ---------- SHIELD ---------- */
-  #shield-chip {
-    top: 56px; left: 24px; width: 22px; height: 22px; display: none;
-    border-radius: 50%;
-    border: 2px solid rgba(120, 200, 255, 0.95);
+  /* ---------- SHIELD BUBBLE ---------- */
+  #shield-btn {
+    bottom: 112px; right: 162px; width: 88px; height: 88px;
+    display: none; align-items: center; justify-content: center;
+  }
+  #shield-ring {
+    position: absolute; inset: 0; border-radius: 50%;
+    box-sizing: border-box;
+    border: 2px solid rgba(110, 193, 255, 0.45);
+    background: conic-gradient(rgba(8, 16, 30, 0.75) 0% 100%,
+      rgba(8, 16, 30, 0.75) 100% 100%);
+  }
+  #shield-face {
+    position: absolute; inset: 7px; border-radius: 50%;
+    background: rgba(6, 10, 20, 0.85);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 2px;
+  }
+  #shield-bubble {
+    width: 26px; height: 26px; border-radius: 50%;
+    border: 2px solid rgba(120, 200, 255, 0.5);
     background: radial-gradient(circle at 35% 30%,
-      rgba(190, 230, 255, 0.9) 0%, rgba(80, 160, 255, 0.35) 45%,
-      rgba(40, 90, 200, 0.15) 100%);
-    box-shadow: 0 0 12px rgba(90, 180, 255, 0.8);
-    animation: shieldBob 1.6s ease-in-out infinite;
+      rgba(190, 230, 255, 0.5) 0%, rgba(80, 160, 255, 0.2) 45%,
+      rgba(40, 90, 200, 0.1) 100%);
   }
-  @keyframes shieldBob {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.1); }
+  #shield-label { font-size: 10px; letter-spacing: 1px; color: #6f87a8; }
+  #shield-btn:not(.armed):not(.active) #shield-bubble { opacity: 0.3; }
+  #shield-btn.armed { pointer-events: auto; animation: superPulse 0.9s ease-in-out infinite; }
+  #shield-btn.armed #shield-ring {
+    border-color: #6ec1ff;
+    box-shadow: 0 0 18px rgba(110, 193, 255, 0.8);
   }
+  #shield-btn.armed #shield-bubble, #shield-btn.active #shield-bubble {
+    border-color: rgba(150, 215, 255, 0.95);
+    box-shadow: 0 0 10px rgba(110, 193, 255, 0.9);
+  }
+  #shield-btn.armed #shield-label, #shield-btn.active #shield-label { color: #6ec1ff; }
+  #shield-btn.warn { opacity: 0.45; }
   #shield-glow {
     position: fixed; inset: 0; pointer-events: none; opacity: 0; z-index: 4;
     background: radial-gradient(ellipse at center,
@@ -275,7 +298,6 @@
 
 <!-- HUD -->
 <div class="hud" id="hearts"></div>
-<div class="hud" id="shield-chip"></div>
 <div id="shield-glow"></div>
 <div class="hud" id="score-box">
   <div>SCORE <span id="score-val">0</span></div>
@@ -290,6 +312,10 @@
 <div class="hud" id="super-btn">
   <div id="super-ring"></div>
   <div id="super-face"><span id="super-bolt">&#9889;</span><span id="super-label">SUPER</span></div>
+</div>
+<div class="hud" id="shield-btn">
+  <div id="shield-ring"></div>
+  <div id="shield-face"><span id="shield-bubble"></span><span id="shield-label">SHIELD</span></div>
 </div>
 
 <!-- boss bar -->
@@ -314,7 +340,7 @@
   <div class="how">
     DRAG TO AIM &middot; BLASTER FIRES BY ITSELF<br>
     CRATES UPGRADE YOUR BLASTER &middot; HEARTS HEAL YOU<br>
-    BLUE BUBBLES BLOCK ONE HIT<br>
+    SHIELD PICKUPS ARM YOUR BUBBLE BUTTON<br>
     SMASH PIRATES TO CHARGE YOUR SUPER BLAST<br>
     BIG BOSS EVERY 5 WAVES
   </div>

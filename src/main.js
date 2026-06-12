@@ -12,7 +12,7 @@ import * as THREE from "three";
    ===================================================================== */
 
 import { sfx } from "./audio.js";
-import { initUI, updateHearts, updateScore, updateShield, $, elWave,
+import { initUI, updateHearts, updateScore, $, elWave,
          elBossWrap, elDmg, elFlash, elHearts, elHint, elShieldFlash,
          scrMenu, scrOver, scrPause } from "./ui.js";
 import { initEffects, updateEffects, shake, spawnExplosion,
@@ -21,7 +21,7 @@ import { initThree, buildWorld, updateWorld } from "./world.js";
 import { initSkeletons, buildSharedParts, updateEnemies } from "./skeletons.js";
 import { initWeapons, buildCockpitCannon, buildWeaponPools, setWeaponTier,
          fireWeapon, updateBullets, updateBolts, updateCrosshair,
-         updateWeaponFX, bullets, bolts } from "./weapons.js";
+         updateWeaponFX, resetAim, bullets, bolts } from "./weapons.js";
 import { initBoss, updateBoss } from "./boss.js";
 import { initPickups, updatePickups, clearPickups } from "./pickups.js";
 import { initWaves, updateWaveFlow } from "./waves.js";
@@ -29,6 +29,7 @@ import { initInput } from "./input.js";
 import { initCombo, comboReset } from "./combo.js";
 import { initSuperBlast, updateSuperBlast, resetSuperBlast,
          chargeSuper } from "./superblast.js";
+import { initShield, updateShieldBubble, resetShield } from "./shield.js";
 
 /* ---------------- CORE STATE ---------------- */
 var ctx = {
@@ -42,7 +43,7 @@ var ctx = {
   MAX_HEARTS: 5,   // start with 3, earn up to 5
   kills: 0, killsSincePickup: 0, pickupCycle: 0,
   comboChain: 0, comboMult: 1, comboFrac: 0,
-  shielded: false, shieldFade: 0,
+  shieldArmed: false, shieldT: 0, shieldFade: 0,
   invulnT: 0, hurtT: 0, dmgFade: 0, flashFade: 0,
   shakeT: 0, shakeAmp: 0,
   pendingNextWaveAt: null,
@@ -72,19 +73,8 @@ var ctx = {
 
 /* ---------------- PLAYER ---------------- */
 function damagePlayer() {
-  if (ctx.invulnT > 0 || ctx.state !== "PLAYING") return;
-  if (ctx.shielded) {
-    // shield absorbs the hit: no heart loss, no combo reset, none of
-    // the got-hit cues (hurtT, dmgFade); brief invuln so one volley
-    // cannot pop the shield and a heart in the same burst
-    ctx.shielded = false;
-    ctx.invulnT = 0.9;
-    ctx.shieldFade = 1.0;
-    shake(0.45, 0.35);
-    sfx.shieldBreak();
-    updateShield();
-    return;
-  }
+  // shieldT is the active bubble: blocks everything, combo included
+  if (ctx.invulnT > 0 || ctx.shieldT > 0 || ctx.state !== "PLAYING") return;
   ctx.hearts--;
   comboReset();
   ctx.invulnT = 1.3;
@@ -113,13 +103,15 @@ function resetGame() {
   ctx.spawnQueue = [];
   ctx.score = 0; ctx.hearts = 3; ctx.wave = 0;
   ctx.kills = 0; ctx.killsSincePickup = 0; ctx.pickupCycle = 0;
-  ctx.shielded = false; ctx.shieldFade = 0;
+  ctx.shieldFade = 0;
   ctx.invulnT = 0; ctx.hurtT = 0; ctx.dmgFade = 0; ctx.flashFade = 0; ctx.fireT = 0;
   ctx.aimX = 0; ctx.aimY = 0;
   setWeaponTier(0);
   comboReset();
   resetSuperBlast();
-  updateHearts(); updateScore(); updateShield();
+  resetShield();
+  resetAim();
+  updateHearts(); updateScore();
   elWave.textContent = "WAVE 1";
   ctx.pendingNextWaveAt = ctx.elapsed + 0.9;
 }
@@ -185,6 +177,7 @@ function animate() {
     updateBolts(dt);
     updatePickups(dt);
     updateSuperBlast(dt);
+    updateShieldBubble(dt);
     updateCrosshair();
   }
   updateEffects(dt);
@@ -215,6 +208,7 @@ initWeapons(ctx);
 buildCockpitCannon();
 buildWeaponPools();
 initSuperBlast(ctx);
+initShield(ctx);
 initEffects(ctx);
 initBoss(ctx);
 initPickups(ctx);

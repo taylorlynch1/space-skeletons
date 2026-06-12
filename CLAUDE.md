@@ -104,12 +104,16 @@ never from harder execution. He should never feel punished.
    recharge the meter. Charge survives damage, only restart clears it.
    Tunables in src/superblast.js. Golden Skeleton blast-immunity
    decision flagged for item 4 in docs/m1-integration-map.md 6.13.
-3. DONE 2026-06-12. Shield pickup: blue bubble, absorbs one hit with
-   no combo reset and no got-hit cues, then 0.9s invuln. HUD bubble
-   chip by the hearts plus blue edge glow while held. Auto pickup
-   rotation is a 3-slot cycle: crate, shield if unshielded, heart if
-   hurt, crate fallback. Persists across waves until it breaks. A
-   shielded-hit-vs-medals decision is flagged for item 5 in
+3. DONE 2026-06-12, revised same day after iPad playtest. Shield is
+   an active ability: pickups arm one stored charge (max one, extras
+   pay +150), the bubble button left of SUPER BLAST starts a 6s
+   invincibility bubble blocking everything including melee, combo
+   protected, draining ring with a last-1.5s warning blink, activate
+   and expire sounds. Tunables in src/shield.js. Same pass: aim
+   assist reworked to world-space radius capture with stickiness
+   (map 6.15), pickup spawns staggered, spaced, and shrunk to 70
+   percent (map 6.16), crate and shield iconography, Triple Blaster
+   triangle tightened. Medals-vs-bubble decision still flagged in
    docs/m1-integration-map.md 6.14.
 4. Golden Skeleton: rare, fast, flees, 100 points.
 5. End-of-wave pilot medals: Bronze, Silver, Gold by hits taken.

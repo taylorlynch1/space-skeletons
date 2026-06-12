@@ -26,9 +26,9 @@ export var TIERS = [
 
 /* Triple Blaster triangle: one bolt high, two low (h yaw, v pitch, rad) */
 var TRI_OFFSETS = [
-  { h: 0,     v: 0.032 },
-  { h: -0.04, v: -0.022 },
-  { h: 0.04,  v: -0.022 }
+  { h: 0,     v: 0.024 },
+  { h: -0.03, v: -0.017 },
+  { h: 0.03,  v: -0.017 }
 ];
 
 export function maxTierForWave(w) {
@@ -156,31 +156,109 @@ export function setWeaponTier(i) {
   cannonRingMat.color.setHex(ctx.weapon.color);
 }
 
-/* ---------------- SHOOTING ---------------- */
-function acquireAimPoint() {
-  ctx.camera.getWorldDirection(ctx.camDir);
-  var bestDot = 0.993, found = false;
-  for (var i = 0; i < ctx.enemies.length; i++) {
-    if (ctx.enemies[i].remove) continue;
-    enemyCenter(ctx.enemies[i], ctx.tmpV);
-    ctx.tmpV2.copy(ctx.tmpV).sub(ctx.camera.position).normalize();
-    var d = ctx.tmpV2.dot(ctx.camDir);
-    if (d > bestDot) { bestDot = d; ctx.assistPoint.copy(ctx.tmpV); found = true; }
-  }
-  if (ctx.boss && !ctx.boss.entering) {
-    enemyCenter({ group: ctx.boss.group, scale: 3.8 }, ctx.tmpV);
-    ctx.tmpV2.copy(ctx.tmpV).sub(ctx.camera.position).normalize();
-    if (ctx.tmpV2.dot(ctx.camDir) > 0.985) { ctx.assistPoint.copy(ctx.tmpV); found = true; }
-  }
-  if (!found) {
-    ctx.assistPoint.copy(ctx.camera.position).addScaledVector(ctx.camDir, 80);
-  }
-  return ctx.assistPoint;
+/* ---------------- AIM ASSIST ----------------
+   Capture by perpendicular world-space distance from the crosshair
+   ray, NOT by a fixed angle: a fixed angle cone is an ~18 unit radius
+   at spawn depth, which made the stream visibly bend toward skeletons
+   the moment they spawned. The radius is ASSIST_R_NEAR at the visor
+   and tapers to zero at ASSIST_FAR depth, so spawners are ignored and
+   close threats snap hard. The held target keeps the lock while it
+   stays alive and inside ASSIST_STICKY times its capture radius; a
+   rival steals the lock only by getting under ASSIST_STEAL times the
+   held target's line distance. Starting values approved 2026-06-12
+   for playtest tuning. ASSIST_FAR must stay comfortably above parked
+   shooter depths: gunners park at depth 45-65 swaying 6 units and
+   snipers at 66-81 swaying 4, so the hold radius (capture x STICKY)
+   at those depths has to exceed the sway or the lock flickers at
+   every sway extreme. 220 holds both; spawners at depth ~140-156
+   still only get a ~2 unit radius (the old fixed cone gave them 18,
+   which was the visible stream-bend bug). */
+var ASSIST_R_NEAR = 7;
+var ASSIST_FAR = 220;
+var ASSIST_STICKY = 1.35;
+var ASSIST_STEAL = 0.7;
+var BOSS_ASSIST_R = 8;
+
+var assistTarget = null, assistIsBoss = false;
+var aimV = new THREE.Vector3();
+var aimRes = { depth: 0, perp: 0 };
+
+function captureRadius(depth) {
+  return ASSIST_R_NEAR * Math.max(0, 1 - depth / ASSIST_FAR);
 }
+
+function lineDist(p) {
+  aimV.copy(p).sub(ctx.camera.position);
+  aimRes.depth = aimV.dot(ctx.camDir);
+  if (aimRes.depth <= 0) { aimRes.perp = Infinity; return; }
+  var d2 = aimV.lengthSq() - aimRes.depth * aimRes.depth;
+  aimRes.perp = d2 > 0 ? Math.sqrt(d2) : 0;
+}
+
+function bossCenter() {
+  enemyCenter({ group: ctx.boss.group, scale: 3.8 }, ctx.tmpV);
+  return ctx.tmpV;
+}
+
+function acquireAssist() {
+  ctx.camera.getWorldDirection(ctx.camDir);
+
+  // re-validate the held target with the stickiness allowance
+  var heldPerp = Infinity;
+  if (assistIsBoss) {
+    if (!ctx.boss || ctx.boss.entering) assistIsBoss = false;
+    else {
+      lineDist(bossCenter());
+      if (aimRes.perp > BOSS_ASSIST_R * ASSIST_STICKY) assistIsBoss = false;
+      else { heldPerp = aimRes.perp; ctx.assistPoint.copy(ctx.tmpV); }
+    }
+  } else if (assistTarget) {
+    if (assistTarget.remove) assistTarget = null;
+    else {
+      enemyCenter(assistTarget, ctx.tmpV);
+      lineDist(ctx.tmpV);
+      if (aimRes.perp > captureRadius(aimRes.depth) * ASSIST_STICKY) assistTarget = null;
+      else { heldPerp = aimRes.perp; ctx.assistPoint.copy(ctx.tmpV); }
+    }
+  }
+  var held = assistIsBoss || assistTarget !== null;
+
+  // a rival must be inside its own capture radius AND meaningfully
+  // closer to the crosshair line than the held target
+  var best = held ? heldPerp * ASSIST_STEAL : Infinity;
+  for (var i = 0; i < ctx.enemies.length; i++) {
+    var e = ctx.enemies[i];
+    if (e.remove || e === assistTarget) continue;
+    enemyCenter(e, ctx.tmpV);
+    lineDist(ctx.tmpV);
+    if (aimRes.perp < captureRadius(aimRes.depth) && aimRes.perp < best) {
+      best = aimRes.perp;
+      assistTarget = e; assistIsBoss = false;
+      ctx.assistPoint.copy(ctx.tmpV);
+    }
+  }
+  if (ctx.boss && !ctx.boss.entering && !assistIsBoss) {
+    lineDist(bossCenter());
+    if (aimRes.perp < BOSS_ASSIST_R && aimRes.perp < best) {
+      assistIsBoss = true; assistTarget = null;
+      ctx.assistPoint.copy(ctx.tmpV);
+    }
+  }
+  if (assistIsBoss || assistTarget) return true;
+  ctx.assistPoint.copy(ctx.camera.position).addScaledVector(ctx.camDir, 80);
+  return false;
+}
+
+/* Called from resetGame: ctx.enemies is emptied without setting the
+   remove flag, so a held reference would otherwise survive a restart. */
+export function resetAim() { assistTarget = null; assistIsBoss = false; }
+
+/* ---------------- SHOOTING ---------------- */
 
 export function fireWeapon() {
   ctx.camera.updateMatrixWorld(true);
-  var target = acquireAimPoint();
+  acquireAssist();
+  var target = ctx.assistPoint;
   var up = new THREE.Vector3(0, 1, 0).applyQuaternion(ctx.camera.quaternion);
   var right = new THREE.Vector3(1, 0, 0).applyQuaternion(ctx.camera.quaternion);
   var muzzle = new THREE.Vector3();
@@ -307,23 +385,11 @@ export function updateBolts(dt) {
   }
 }
 
-/* ---------------- CROSSHAIR TARGET CHECK ---------------- */
+/* ---------------- CROSSHAIR TARGET CHECK ----------------
+   Same acquire as the bullets, so the lock indicator and the actual
+   convergence point can never disagree. */
 export function updateCrosshair() {
-  var locked = false;
-  ctx.camera.getWorldDirection(ctx.camDir);
-  var i;
-  for (i = 0; i < ctx.enemies.length; i++) {
-    if (ctx.enemies[i].remove) continue;
-    enemyCenter(ctx.enemies[i], ctx.tmpV);
-    ctx.tmpV.sub(ctx.camera.position).normalize();
-    if (ctx.tmpV.dot(ctx.camDir) > 0.993) { locked = true; break; }
-  }
-  if (!locked && ctx.boss && !ctx.boss.entering) {
-    enemyCenter({ group: ctx.boss.group, scale: 3.8 }, ctx.tmpV);
-    ctx.tmpV.sub(ctx.camera.position).normalize();
-    if (ctx.tmpV.dot(ctx.camDir) > 0.985) locked = true;
-  }
-  elCross.classList.toggle("locked", locked);
+  elCross.classList.toggle("locked", acquireAssist());
 }
 
 /* muzzle flash fade + cannon recoil, runs every frame */
