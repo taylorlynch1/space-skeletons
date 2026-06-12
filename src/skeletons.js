@@ -344,6 +344,7 @@ export function killEnemy(e, scored) {
   sfx.bonk();
   if (scored) {
     comboKill();
+    ctx.chargeSuper(1);
     var pts = e.pts * ctx.comboMult;
     ctx.score += pts; updateScore();
     scorePop(ctx.tmpV, "+" + pts, false);

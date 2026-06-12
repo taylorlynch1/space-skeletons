@@ -92,5 +92,20 @@ export var sfx = {
     tone(b * 1.25, b * 1.25, 0.08, "sine", 0.4, 0.07);
     tone(b * 1.5, b * 1.5, 0.12, "sine", 0.45, 0.14);
   },
+  /* super meter full: bright fanfare, higher than heart and combo chimes */
+  superReady: function () {
+    tone(660, 660, 0.09, "square", 0.35);
+    tone(880, 880, 0.09, "square", 0.35, 0.08);
+    tone(1320, 1320, 0.16, "square", 0.4, 0.16);
+    tone(1760, 1760, 0.22, "sine", 0.3, 0.26);
+  },
+  /* the big one: rising zap into a deep drop and a long searing tail */
+  superBlast: function () {
+    tone(220, 1400, 0.18, "sawtooth", 0.5);
+    tone(90, 24, 1.1, "sine", 0.85, 0.12);
+    noiseHit(1.0, 0.85, 900, 0.1);
+    noiseHit(0.7, 0.5, 2600, 0.1);
+    tone(1200, 160, 0.7, "square", 0.3, 0.15);
+  },
   bossDie:function () { sfx.bigBoom(); tone(520, 60, 1.2, "sawtooth", 0.5, 0.2); }
 };

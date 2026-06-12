@@ -189,3 +189,25 @@ and ownership boundaries are stable.
     default instead of an achievement: raise THRESHOLDS in
     src/combo.js (currently 5/10/15) or add a slow decay, with
     Taylor's sign-off.
+12. SUPER BLAST (M1 item 2) wiring: charge hooks live at the two
+    comboKill sites through the ctx.chargeSuper callback (killEnemy
+    pays 1, killBoss pays 5). The blast cascade calls
+    killEnemy(e, true) on every active enemy nearest-first, so blast
+    kills pay multiplied score and extend the combo (approved by
+    Taylor 2026-06-12). chargeSuper no-ops while a blast is running,
+    so blast kills never recharge the meter. Bolt shoot-downs (+5)
+    and crates (+150) do not charge. Tunables in src/superblast.js:
+    CHARGE_KILLS 15, BOSS_HP_CUT 0.25, KILL_GAP 0.06. The 25 percent
+    boss cut is OWED, not snapshotted: fired during a boss entrance or
+    with the boss still in the spawn queue, the blast stays pending and
+    the cut lands when the entrance ends, so a saved meter is never
+    wasted. Bolts are wiped every frame while a blast runs. Beam life
+    scales with cascade length so the beam outlives the last kill.
+    Hearts blink on ctx.hurtT (set only by real damage), not invulnT,
+    so blast i-frames never show the got-hit cue.
+13. Golden Skeleton (M1 item 4) vs SUPER BLAST, flagged by Taylor
+    2026-06-12: the blast kills EVERY active enemy, which would hand
+    out a free multiplied 100 point award for a rare fleeing target
+    designed to be chased. Item 4's plan MUST decide whether the
+    Golden Skeleton is blast-immune (for example it flees or despawns
+    instead of dying) before merge.

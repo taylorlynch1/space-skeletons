@@ -27,6 +27,8 @@ import { initPickups, updatePickups, clearPickups } from "./pickups.js";
 import { initWaves, updateWaveFlow } from "./waves.js";
 import { initInput } from "./input.js";
 import { initCombo, comboReset } from "./combo.js";
+import { initSuperBlast, updateSuperBlast, resetSuperBlast,
+         chargeSuper } from "./superblast.js";
 
 /* ---------------- CORE STATE ---------------- */
 var ctx = {
@@ -40,7 +42,7 @@ var ctx = {
   MAX_HEARTS: 5,   // start with 3, earn up to 5
   kills: 0, killsSincePickup: 0, pickupFlip: false,
   comboChain: 0, comboMult: 1, comboFrac: 0,
-  invulnT: 0, dmgFade: 0, flashFade: 0,
+  invulnT: 0, hurtT: 0, dmgFade: 0, flashFade: 0,
   shakeT: 0, shakeAmp: 0,
   pendingNextWaveAt: null,
   hintShown: false,
@@ -64,7 +66,7 @@ var ctx = {
   camDir: new THREE.Vector3(), assistPoint: new THREE.Vector3(),
 
   // cross-module callbacks, wired below
-  damagePlayer: null, startPlaying: null
+  damagePlayer: null, startPlaying: null, chargeSuper: null
 };
 
 /* ---------------- PLAYER ---------------- */
@@ -73,6 +75,7 @@ function damagePlayer() {
   ctx.hearts--;
   comboReset();
   ctx.invulnT = 1.3;
+  ctx.hurtT = 1.3;
   ctx.dmgFade = 1.0;
   shake(0.7, 0.5);
   sfx.hurt();
@@ -97,10 +100,11 @@ function resetGame() {
   ctx.spawnQueue = [];
   ctx.score = 0; ctx.hearts = 3; ctx.wave = 0;
   ctx.kills = 0; ctx.killsSincePickup = 0; ctx.pickupFlip = false;
-  ctx.invulnT = 0; ctx.dmgFade = 0; ctx.flashFade = 0; ctx.fireT = 0;
+  ctx.invulnT = 0; ctx.hurtT = 0; ctx.dmgFade = 0; ctx.flashFade = 0; ctx.fireT = 0;
   ctx.aimX = 0; ctx.aimY = 0;
   setWeaponTier(0);
   comboReset();
+  resetSuperBlast();
   updateHearts(); updateScore();
   elWave.textContent = "WAVE 1";
   ctx.pendingNextWaveAt = ctx.elapsed + 0.9;
@@ -157,6 +161,7 @@ function animate() {
 
   if (ctx.state === "PLAYING") {
     ctx.invulnT = Math.max(0, ctx.invulnT - dt);
+    ctx.hurtT = Math.max(0, ctx.hurtT - dt);
     ctx.fireT -= dt;
     if (ctx.fireT <= 0) { ctx.fireT = ctx.weapon.rate; fireWeapon(); }
     updateWaveFlow(dt);
@@ -165,6 +170,7 @@ function animate() {
     updateBullets(dt);
     updateBolts(dt);
     updatePickups(dt);
+    updateSuperBlast(dt);
     updateCrosshair();
   }
   updateEffects(dt);
@@ -172,7 +178,9 @@ function animate() {
 
   if (ctx.dmgFade > 0) { ctx.dmgFade = Math.max(0, ctx.dmgFade - dt * 1.4); elDmg.style.opacity = ctx.dmgFade; }
   if (ctx.flashFade > 0) { ctx.flashFade = Math.max(0, ctx.flashFade - dt * 1.2); elFlash.style.opacity = ctx.flashFade; }
-  elHearts.style.opacity = (ctx.invulnT > 0 && Math.floor(ctx.elapsed * 10) % 2 === 0) ? 0.35 : 1;
+  // hurtT, not invulnT: the blink is the got-hit cue and must not play
+  // during the friendly i-frames a SUPER BLAST grants
+  elHearts.style.opacity = (ctx.hurtT > 0 && Math.floor(ctx.elapsed * 10) % 2 === 0) ? 0.35 : 1;
 
   ctx.renderer.render(ctx.scene, ctx.camera);
 }
@@ -180,6 +188,7 @@ function animate() {
 /* ---------------- BOOT ---------------- */
 ctx.damagePlayer = damagePlayer;
 ctx.startPlaying = startPlaying;
+ctx.chargeSuper = chargeSuper;
 
 initUI(ctx);
 initCombo(ctx);
@@ -190,6 +199,7 @@ buildWorld();
 initWeapons(ctx);
 buildCockpitCannon();
 buildWeaponPools();
+initSuperBlast(ctx);
 initEffects(ctx);
 initBoss(ctx);
 initPickups(ctx);

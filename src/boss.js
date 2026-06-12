@@ -143,6 +143,7 @@ export function killBoss() {
   var boss = ctx.boss;
   var pos = boss.group.position.clone(); pos.y += 6;
   comboKill();
+  ctx.chargeSuper(5);   // a boss kill pays a big chunk of super charge
   var pts = 300 * boss.tier * ctx.comboMult;
   ctx.score += pts; updateScore();
   scorePop(pos, "+" + pts, true);

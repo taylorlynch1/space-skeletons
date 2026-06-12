@@ -95,8 +95,15 @@ never from harder execution. He should never feel punished.
    5/10/15 kills, no decay (tunable, see docs/m1-integration-map.md
    section 6.11). Applies to enemy and boss kills only; +5 bolt and
    +150 crate awards stay unmultiplied.
-2. SUPER BLAST: kills charge a meter, big tappable button when full,
-   screen-clearing beam. Spend-or-save decision.
+2. DONE 2026-06-12. SUPER BLAST: 15 scored kills fill the meter (boss
+   kill pays 5), bottom-right button arms when full, Space fires on
+   desktop. Blast wipes all enemy bolts, kills every enemy nearest
+   first on a bonk cascade, boss loses 25 percent of max hp (deferred
+   to entrance end if fired early, a saved meter is never wasted). Blast
+   kills pay multiplied score and extend the combo; blast kills never
+   recharge the meter. Charge survives damage, only restart clears it.
+   Tunables in src/superblast.js. Golden Skeleton blast-immunity
+   decision flagged for item 4 in docs/m1-integration-map.md 6.13.
 3. Shield pickup: blue bubble, absorbs one hit, third pickup type.
 4. Golden Skeleton: rare, fast, flees, 100 points.
 5. End-of-wave pilot medals: Bronze, Silver, Gold by hits taken.
