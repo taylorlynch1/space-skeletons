@@ -9,8 +9,6 @@ import { spawnExplosion } from "./effects.js";
 
 var ctx;
 
-var GOLDEN_CHANCE = 0.35;   // of non-boss waves from wave 2, max one
-
 export function initWaves(c) { ctx = c; }
 
 export function beginWave(n) {
@@ -44,9 +42,12 @@ export function beginWave(n) {
   for (i = 0; i < list.length; i++) {
     ctx.spawnQueue.push({ at: ctx.elapsed + 0.8 + i * 0.7, type: list[i] });
   }
-  // golden skeleton: rare bonus chase, arrives mid-wave so his banner
-  // and twinkle never collide with the wave banner
-  if (ctx.wave >= 2 && Math.random() < GOLDEN_CHANCE) {
+  // golden skeleton: strictly every other non-boss wave (Taylor,
+  // 2026-06-12), no random roll. nonBossIndex counts non-boss waves
+  // in order; he rides the even ones: waves 2, 4, 7, 9, 12, 14...
+  // Arrives mid-wave so his banner never collides with the wave banner.
+  var nonBossIndex = ctx.wave - Math.floor(ctx.wave / 5);
+  if (nonBossIndex % 2 === 0) {
     ctx.spawnQueue.push({ at: ctx.elapsed + 4 + Math.random() * 3, type: "golden" });
   }
 }

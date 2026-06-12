@@ -37,3 +37,7 @@ milestone planning session. Created 2026-06-12.
 - Sketch: two-layer system, canyon loop plus boss loop, crossfade
   hooked into spawnBoss and killBoss, duck the music under the roar.
   Needs Taylor's call on M3 vs M4 placement.
+- Also at this milestone: the golden skeleton speaks the words TOO
+  SLOW out loud when he escapes (replacing or layering the current
+  whistle plus text pop). Voice source to be decided then; candidate
+  is the kid's own voice per M4 item 4.

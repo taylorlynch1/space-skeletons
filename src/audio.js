@@ -109,11 +109,13 @@ export var sfx = {
   heartbeat: function () { tone(58, 50, 0.1, "sine", 0.3);
                            tone(52, 46, 0.12, "sine", 0.26, 0.16); },
   waveUp: function () { tone(520, 820, 0.14, "sine", 0.35); },
-  /* golden skeleton arrives: bright twinkle, look up! */
-  goldenSpawn: function () { tone(1320, 1320, 0.07, "sine", 0.35);
-                             tone(1760, 1760, 0.07, "sine", 0.35, 0.07);
-                             tone(2200, 2200, 0.12, "sine", 0.4, 0.14);
-                             tone(1100, 2200, 0.18, "sine", 0.22, 0.2); },
+  /* golden skeleton arrives: big bright twinkle, impossible to miss */
+  goldenSpawn: function () { tone(1320, 1320, 0.07, "sine", 0.5);
+                             tone(1760, 1760, 0.07, "sine", 0.5, 0.07);
+                             tone(2200, 2200, 0.14, "sine", 0.55, 0.14);
+                             tone(2640, 2640, 0.18, "sine", 0.45, 0.22);
+                             tone(1100, 2640, 0.25, "sine", 0.3, 0.2);
+                             noiseHit(0.12, 0.15, 6000, 0.14); },
   /* golden skeleton escapes: cheeky doppler whistle away */
   goldenFlee: function () { tone(1500, 400, 0.5, "sine", 0.4);
                             tone(900, 200, 0.4, "sine", 0.25, 0.08); },

@@ -1,7 +1,7 @@
 /* ---------------- SKELETON PIRATES (shared parts, builder, enemy logic) ---------------- */
 import * as THREE from "three";
 import { sfx } from "./audio.js";
-import { spawnExplosion, spawnBones } from "./effects.js";
+import { spawnExplosion, spawnBones, spawnGoldSpark } from "./effects.js";
 import { updateScore, scorePop, showBanner } from "./ui.js";
 import { spawnAutoPickup } from "./pickups.js";
 import { comboKill } from "./combo.js";
@@ -59,15 +59,18 @@ export function buildSharedParts() {
   G.rifleBarrel = new THREE.CylinderGeometry(0.06, 0.06, 1.0, 8);
   G.gunCoil = new THREE.TorusGeometry(0.12, 0.03, 6, 12);
   G.gunTip  = new THREE.SphereGeometry(0.1, 6, 6);
+  G.aura    = new THREE.SphereGeometry(2.3, 12, 10);
   G.capeStrip = new THREE.BoxGeometry(0.8, 2.4, 0.06);
   G.pauldron = new THREE.SphereGeometry(0.5, 10, 8);
   G.belt    = new THREE.BoxGeometry(1.1, 0.18, 0.6);
 
   M.bone   = new THREE.MeshPhongMaterial({ color: 0xe9e3d2, flatShading: true, shininess: 4 });
   M.boneBoss = new THREE.MeshPhongMaterial({ color: 0xcfc3a6, flatShading: true, shininess: 4 });
-  M.boneGold = new THREE.MeshPhongMaterial({ color: 0xf5c84a, emissive: 0x8a6a14,
-              emissiveIntensity: 0.5, flatShading: true, shininess: 30 });
-  M.goldPupil = new THREE.MeshBasicMaterial({ color: 0xfff2b0 });
+  M.boneGold = new THREE.MeshPhongMaterial({ color: 0xffd96a, emissive: 0xffb820,
+              emissiveIntensity: 0.95, flatShading: true, shininess: 30 });
+  M.goldPupil = new THREE.MeshBasicMaterial({ color: 0xffffd0 });
+  M.goldAura = new THREE.MeshBasicMaterial({ color: 0xffd34d, transparent: true,
+              opacity: 0.28, blending: THREE.AdditiveBlending, depthWrite: false });
   M.dark   = new THREE.MeshPhongMaterial({ color: 0x15131c, flatShading: true, shininess: 4 });
   M.iron   = new THREE.MeshPhongMaterial({ color: 0x3a3f4c, flatShading: true, shininess: 4 });
   M.hat    = new THREE.MeshPhongMaterial({ color: 0x221c2c, flatShading: true, shininess: 4 });
@@ -264,10 +267,15 @@ export function makeSkeleton(type, scale) {
     g.add(glowLight);
   }
 
+  var aura = null;
+  if (type === "golden") {
+    aura = mesh(G.aura, M.goldAura, 0, 2.2, 0);
+  }
+
   g.scale.set(scale, scale, scale);
   return { group: g, legL: legL, legR: legR, armL: armL, armR: armR,
            flames: flames, jaw: jaw, halos: halos, capes: capes,
-           holdsSword: holdsSword };
+           aura: aura, holdsSword: holdsSword };
 }
 
 /* ---------------- ENEMIES ---------------- */
@@ -356,7 +364,7 @@ export function spawnGolden() {
     homeX: (Math.random() - 0.5) * 36,
     t: Math.random() * 10, phase: Math.random() * 6,
     windowT: GOLDEN_WINDOW, fleeing: false, fleeSpeed: 30,
-    arrived: false, dartT: 0,
+    arrived: false, dartT: 0, sparkT: 0,
     scale: 1, pts: 100, remove: false
   };
   e.group.position.set((Math.random() - 0.5) * 50, e.baseY, -150);
@@ -421,6 +429,14 @@ export function updateEnemies(dt) {
     }
 
     if (e.kind === "golden") {
+      // shimmer aura pulse and gold sparkle trail, darting AND fleeing
+      e.parts.aura.scale.setScalar(1 + Math.sin(e.t * 5) * 0.12);
+      e.sparkT -= dt;
+      if (e.sparkT <= 0) {
+        e.sparkT = 0.07;
+        enemyCenter(e, ctx.tmpV2);
+        spawnGoldSpark(ctx.tmpV2);
+      }
       if (e.fleeing) {
         e.fleeSpeed += dt * 90;
         g.position.z -= e.fleeSpeed * dt;

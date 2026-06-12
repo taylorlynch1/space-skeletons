@@ -16,7 +16,7 @@ import { initUI, updateHearts, updateScore, $, elWave,
          elBossWrap, elDmg, elFlash, elHearts, elHint, elShieldFlash,
          scrMenu, scrOver, scrPause } from "./ui.js";
 import { initEffects, updateEffects, shake, spawnExplosion,
-         shards, explosions, sparks } from "./effects.js";
+         shards, explosions, sparks, goldSparks } from "./effects.js";
 import { initThree, buildWorld, updateWorld } from "./world.js";
 import { initSkeletons, buildSharedParts, updateEnemies } from "./skeletons.js";
 import { initWeapons, buildCockpitCannon, buildWeaponPools, setWeaponTier,
@@ -94,7 +94,7 @@ function resetGame() {
   if (ctx.boss) { ctx.scene.remove(ctx.boss.group); ctx.boss = null; }
   elBossWrap.style.display = "none";
   clearPickups();
-  [bullets, bolts, shards, explosions, sparks].forEach(function (pool) {
+  [bullets, bolts, shards, explosions, sparks, goldSparks].forEach(function (pool) {
     for (var k = 0; k < pool.length; k++) {
       pool[k].active = false; pool[k].mesh.visible = false;
     }

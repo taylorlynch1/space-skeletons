@@ -225,7 +225,9 @@ and ownership boundaries are stable.
     cascade in fireSuperBlast skips kind "golden" and calls
     fleeGolden(e, false) instead, so the blast scares him off with the
     flee whistle and no TOO SLOW tease. Splash damage can still kill
-    him (an earned shot). Tunables: GOLDEN_CHANCE 0.35 in waves.js,
+    him (an earned shot). Schedule: strictly every other non-boss wave
+    (2, 4, 7, 9, 12...), derived from non-boss-wave-index parity in
+    beginWave, no random roll, no per-run state. Tunables:
     GOLDEN_WINDOW 8 and hp 2 in skeletons.js. He never attacks. He
     can extend wave end by his spawn delay (up to 7s) plus his window
     (8s) plus about 1.4s of flee travel, roughly 16s worst case from

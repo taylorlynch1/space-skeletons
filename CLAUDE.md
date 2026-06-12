@@ -51,8 +51,8 @@ never from harder execution. He should never feel punished.
   SKULLSWORD, DREAD KING MARROW, THE BONE EMPEROR.
 - Enemy roster: Slasher (wave 1+), Gunner (wave 2+), Brute (wave 6+,
   eyepatch, iron plate, 30 pts), Sniper (wave 8+, purple bolts, 25 pts),
-  Golden Skeleton (wave 2+, rare bonus, darts and flees after 8s,
-  100 pts, blast-immune, never attacks).
+  Golden Skeleton (every other non-boss wave from wave 2, darts and
+  flees after 8s, 100 pts, blast-immune, never attacks).
 - Ladder monotonicity: every weapon tier must feel like a clear
   upgrade over the tier below it: stronger look, stronger sound, and
   higher effective damage output against typical waves, with splash
@@ -123,14 +123,14 @@ never from harder execution. He should never feel punished.
    percent (map 6.16), crate and shield iconography, Triple Blaster
    triangle tightened. Medals-vs-bubble decision still flagged in
    docs/m1-integration-map.md 6.14.
-4. DONE 2026-06-12. Golden Skeleton: gold-boned darting flier, 35
-   percent of non-boss waves from wave 2, max one, arrives mid-wave
-   with a twinkle and banner, flees after 8s with a doppler whistle
-   and a TOO SLOW! pop. 100 pts multiplied by combo, big gold score
-   pop, ka-ching over the bonk. Blast-immune: a SUPER BLAST scares
-   him off instead (map 6.13 resolved). Splash can still kill him.
-   Tunables: GOLDEN_CHANCE in waves.js, GOLDEN_WINDOW and hp in
-   skeletons.js.
+4. DONE 2026-06-12. Golden Skeleton: glowing gold darting flier with
+   shimmer aura and sparkle trail, strictly every other non-boss wave
+   from wave 2 (2, 4, 7, 9...), max one, arrives mid-wave with a
+   twinkle and banner, flees after 8s with a doppler whistle and a
+   TOO SLOW! pop. 100 pts multiplied by combo, big gold score pop,
+   ka-ching over the bonk. Blast-immune: a SUPER BLAST scares him off
+   instead (map 6.13 resolved). Splash can still kill him. Tunables:
+   GOLDEN_WINDOW and hp in skeletons.js.
 5. End-of-wave pilot medals: Bronze, Silver, Gold by hits taken.
 6. Boss entrance taunts: speech bubble text, kid-friendly trash talk.
 
