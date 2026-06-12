@@ -45,8 +45,8 @@ export function spawnWeaponCrate() {
   var color = next >= 0 ? TIERS[next].color : 0xffd34d;
   var g = makePickupGroup(color);
   var box = new THREE.Mesh(new THREE.BoxGeometry(0.95, 0.95, 0.95),
-    new THREE.MeshLambertMaterial({ color: color, emissive: color,
-      emissiveIntensity: 0.55, flatShading: true }));
+    new THREE.MeshPhongMaterial({ color: color, emissive: color,
+      emissiveIntensity: 0.55, flatShading: true, shininess: 4 }));
   g.add(box);
   g.position.set((Math.random() - 0.5) * 24, 4 + Math.random() * 5, -95);
   ctx.scene.add(g);

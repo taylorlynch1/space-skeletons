@@ -41,8 +41,8 @@ var cannon, cannonTipMesh, cannonTipMat, cannonRingMat, muzzleFlash, recoil = 0;
 
 export function buildCockpitCannon() {
   cannon = new THREE.Group();
-  var grey = new THREE.MeshLambertMaterial({ color: 0x6a7484, flatShading: true });
-  var dark = new THREE.MeshLambertMaterial({ color: 0x2a2f3c, flatShading: true });
+  var grey = new THREE.MeshPhongMaterial({ color: 0x6a7484, flatShading: true, shininess: 4 });
+  var dark = new THREE.MeshPhongMaterial({ color: 0x2a2f3c, flatShading: true, shininess: 4 });
   var barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.18, 1.5, 10), grey);
   barrel.rotation.x = Math.PI / 2;
   barrel.position.set(0, -0.62, -1.55);

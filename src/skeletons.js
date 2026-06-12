@@ -62,19 +62,19 @@ export function buildSharedParts() {
   G.pauldron = new THREE.SphereGeometry(0.5, 10, 8);
   G.belt    = new THREE.BoxGeometry(1.1, 0.18, 0.6);
 
-  M.bone   = new THREE.MeshLambertMaterial({ color: 0xe9e3d2, flatShading: true });
-  M.boneBoss = new THREE.MeshLambertMaterial({ color: 0xcfc3a6, flatShading: true });
-  M.dark   = new THREE.MeshLambertMaterial({ color: 0x15131c, flatShading: true });
-  M.iron   = new THREE.MeshLambertMaterial({ color: 0x3a3f4c, flatShading: true });
-  M.hat    = new THREE.MeshLambertMaterial({ color: 0x221c2c, flatShading: true });
-  M.gold   = new THREE.MeshLambertMaterial({ color: 0xcaa052, flatShading: true });
+  M.bone   = new THREE.MeshPhongMaterial({ color: 0xe9e3d2, flatShading: true, shininess: 4 });
+  M.boneBoss = new THREE.MeshPhongMaterial({ color: 0xcfc3a6, flatShading: true, shininess: 4 });
+  M.dark   = new THREE.MeshPhongMaterial({ color: 0x15131c, flatShading: true, shininess: 4 });
+  M.iron   = new THREE.MeshPhongMaterial({ color: 0x3a3f4c, flatShading: true, shininess: 4 });
+  M.hat    = new THREE.MeshPhongMaterial({ color: 0x221c2c, flatShading: true, shininess: 4 });
+  M.gold   = new THREE.MeshPhongMaterial({ color: 0xcaa052, flatShading: true, shininess: 4 });
   M.red    = new THREE.MeshBasicMaterial({ color: 0xff2e2e });
   M.purple = new THREE.MeshBasicMaterial({ color: 0xd24dff });
   M.redGlow= new THREE.MeshBasicMaterial({ color: 0xff2222, transparent: true,
               opacity: 0.45, blending: THREE.AdditiveBlending, depthWrite: false });
-  M.metal  = new THREE.MeshLambertMaterial({ color: 0xb9c4d8, emissive: 0x1a2230,
-              flatShading: true });
-  M.gun    = new THREE.MeshLambertMaterial({ color: 0x2a2f3c, flatShading: true });
+  M.metal  = new THREE.MeshPhongMaterial({ color: 0xb9c4d8, emissive: 0x1a2230,
+              flatShading: true, shininess: 4 });
+  M.gun    = new THREE.MeshPhongMaterial({ color: 0x2a2f3c, flatShading: true, shininess: 4 });
   M.coil   = new THREE.MeshBasicMaterial({ color: 0xff5040, transparent: true,
               opacity: 0.85, blending: THREE.AdditiveBlending, depthWrite: false });
   M.coilP  = new THREE.MeshBasicMaterial({ color: 0xd24dff, transparent: true,
@@ -83,9 +83,9 @@ export function buildSharedParts() {
               opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false });
   M.flameIn= new THREE.MeshBasicMaterial({ color: 0xffd34d, transparent: true,
               opacity: 0.95, blending: THREE.AdditiveBlending, depthWrite: false });
-  M.cape   = new THREE.MeshLambertMaterial({ color: 0x230d14, flatShading: true });
-  M.heart  = new THREE.MeshLambertMaterial({ color: 0xff3050, emissive: 0xff2040,
-              emissiveIntensity: 0.55, flatShading: true });
+  M.cape   = new THREE.MeshPhongMaterial({ color: 0x230d14, flatShading: true, shininess: 4 });
+  M.heart  = new THREE.MeshPhongMaterial({ color: 0xff3050, emissive: 0xff2040,
+              emissiveIntensity: 0.55, flatShading: true, shininess: 4 });
 }
 
 /* Build one skeleton pirate.

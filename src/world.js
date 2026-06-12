@@ -215,7 +215,7 @@ export function buildWorld() {
   scene.add(shimmer);
 
   // rocky banks edging the river
-  var bankMat = new THREE.MeshLambertMaterial({ color: 0x1d0c0e, flatShading: true });
+  var bankMat = new THREE.MeshPhongMaterial({ color: 0x1d0c0e, flatShading: true, shininess: 4 });
   var bankL = new THREE.Mesh(new THREE.BoxGeometry(12, 1.7, 900), bankMat);
   bankL.position.set(-38, 0.55, -250);
   scene.add(bankL);
@@ -226,9 +226,9 @@ export function buildWorld() {
   // canyon walls: solid mountain rows on both sides, flowing past you
   var mtGeo = new THREE.ConeGeometry(1, 1.7, 6);
   var rockMats = [
-    new THREE.MeshLambertMaterial({ color: 0x21100f, flatShading: true }),
-    new THREE.MeshLambertMaterial({ color: 0x180a0b, flatShading: true }),
-    new THREE.MeshLambertMaterial({ color: 0x2a1410, flatShading: true })
+    new THREE.MeshPhongMaterial({ color: 0x21100f, flatShading: true, shininess: 4 }),
+    new THREE.MeshPhongMaterial({ color: 0x180a0b, flatShading: true, shininess: 4 }),
+    new THREE.MeshPhongMaterial({ color: 0x2a1410, flatShading: true, shininess: 4 })
   ];
   var i, m, s, side;
   for (i = 0; i < 26; i++) {
