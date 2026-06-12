@@ -38,6 +38,8 @@ and ownership boundaries are stable.
    - boss.js:145, boss kill, `+300 * tier`
    - pickups.js:110, weapon crate at tier cap, `+150` (locked fact),
      banner "MAX POWER!" at 112, no scorePop
+   - pickups.js, shield collected while already shielded, `+150`,
+     banner "SHIELD FULL!", no scorePop, unmultiplied (M1 item 3)
 6. Funny kill sound: `sfx.bonk()` audio.js:62-76, three randomized
    variants (xylophone, boing, slide whistle). Beloved, locked.
 
@@ -66,6 +68,14 @@ and ownership boundaries are stable.
    i-frames at main.js:171.
 4. `gameOver()` main.js:105-113, called only from damagePlayer. Sets
    state OVER, fills over-score/over-best, shows screen-over.
+5. Shield gate (M1 item 3, approved 2026-06-12): damagePlayer checks
+   ctx.shielded AFTER the invuln guard and BEFORE hearts--. A shielded
+   hit consumes the shield, grants 0.9s invuln, plays sfx.shieldBreak
+   plus a blue flash (ctx.shieldFade), does NOT reset the combo, does
+   NOT set hurtT or dmgFade, and returns. The got-hit cues stay
+   exclusive to real damage. Auto pickup rotation is now a 3-slot
+   cycle (ctx.pickupCycle replaced ctx.pickupFlip): crate, shield if
+   unshielded, heart if hurt, crate as every fallback.
 
 ## 3. HUD and UI conventions
 
@@ -92,8 +102,9 @@ and ownership boundaries are stable.
 5. Anchored positions: hearts top 16 left 22, score box top 16 right 22,
    wave box top center, weapon pill bottom 22 center, boss bar top 52
    center (display none unless boss), hint bottom 78 center (transient).
-   FREE spots for new HUD: under the score box top-right, under hearts
-   top-left, above the weapon pill bottom-center.
+   FREE spots for new HUD: above the weapon pill bottom-center is the
+   last one left. The combo meter took under the score box top-right
+   and the shield chip took under hearts top-left.
 6. The only meter pattern is the boss bar: outer #boss-bar-bg (14px,
    border, radius 999px, overflow hidden) + inner #boss-bar-fill driven
    by `style.width = pct + "%"` with a 0.12s width transition
@@ -154,7 +165,7 @@ and ownership boundaries are stable.
 
 ## 6. Standing risks and decisions for M1 features
 
-1. Score is awarded at 4 independent sites (section 1.5). Any multiplier
+1. Score is awarded at 5 independent sites (section 1.5). Any multiplier
    or meter charging needs an explicit per-site decision and either a
    new shared helper or per-site edits. The +150 crate value is a locked
    design fact; do not multiply it without sign-off.
@@ -211,3 +222,8 @@ and ownership boundaries are stable.
     designed to be chased. Item 4's plan MUST decide whether the
     Golden Skeleton is blast-immune (for example it flees or despawns
     instead of dying) before merge.
+14. Medals (M1 item 5) vs shield: medals are graded by hits taken.
+    Item 5's plan MUST decide whether a shielded hit counts as a hit
+    taken for the medal grade. A shielded hit does not call comboReset
+    and leaves hurtT and dmgFade untouched, so if medals key off any
+    of those signals a shielded hit is invisible to them today.

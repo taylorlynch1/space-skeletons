@@ -63,6 +63,32 @@
   #score-box { top: 16px; right: 22px; text-align: right; font-size: 18px; }
   #score-box .best { font-size: 12px; color: #caa052; margin-top: 2px; }
 
+  /* ---------- SHIELD ---------- */
+  #shield-chip {
+    top: 56px; left: 24px; width: 22px; height: 22px; display: none;
+    border-radius: 50%;
+    border: 2px solid rgba(120, 200, 255, 0.95);
+    background: radial-gradient(circle at 35% 30%,
+      rgba(190, 230, 255, 0.9) 0%, rgba(80, 160, 255, 0.35) 45%,
+      rgba(40, 90, 200, 0.15) 100%);
+    box-shadow: 0 0 12px rgba(90, 180, 255, 0.8);
+    animation: shieldBob 1.6s ease-in-out infinite;
+  }
+  @keyframes shieldBob {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+  }
+  #shield-glow {
+    position: fixed; inset: 0; pointer-events: none; opacity: 0; z-index: 4;
+    background: radial-gradient(ellipse at center,
+      rgba(0, 0, 0, 0) 62%, rgba(80, 170, 255, 0.3) 100%);
+    transition: opacity 0.4s;
+  }
+  #shield-flash {
+    position: fixed; inset: 0; pointer-events: none; opacity: 0; z-index: 9;
+    background: rgba(120, 190, 255, 0.5);
+  }
+
   /* ---------- COMBO METER ---------- */
   #combo-wrap { top: 64px; right: 22px; text-align: right; display: none;
                 transform-origin: top right; }
@@ -249,6 +275,8 @@
 
 <!-- HUD -->
 <div class="hud" id="hearts"></div>
+<div class="hud" id="shield-chip"></div>
+<div id="shield-glow"></div>
 <div class="hud" id="score-box">
   <div>SCORE <span id="score-val">0</span></div>
   <div class="best">BEST <span id="best-val">0</span></div>
@@ -275,6 +303,7 @@
 <div id="dmg-vignette"></div>
 <div id="red-flash"></div>
 <div id="super-flash"></div>
+<div id="shield-flash"></div>
 <div id="hint">DRAG TO AIM. YOUR BLASTER FIRES BY ITSELF.</div>
 
 <!-- screens -->
@@ -285,6 +314,7 @@
   <div class="how">
     DRAG TO AIM &middot; BLASTER FIRES BY ITSELF<br>
     CRATES UPGRADE YOUR BLASTER &middot; HEARTS HEAL YOU<br>
+    BLUE BUBBLES BLOCK ONE HIT<br>
     SMASH PIRATES TO CHARGE YOUR SUPER BLAST<br>
     BIG BOSS EVERY 5 WAVES
   </div>

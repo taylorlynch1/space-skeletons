@@ -3,7 +3,7 @@ import * as THREE from "three";
 import { sfx } from "./audio.js";
 import { M } from "./skeletons.js";
 import { TIERS, maxTierForWave, setWeaponTier } from "./weapons.js";
-import { showBanner, updateHearts, updateScore } from "./ui.js";
+import { showBanner, updateHearts, updateScore, updateShield } from "./ui.js";
 
 var ctx;
 
@@ -17,14 +17,13 @@ export function nextTierIndex() {
 }
 
 export function spawnAutoPickup() {
-  // alternate heart and weapon crate when you're hurt; otherwise weapons
-  if (ctx.hearts < ctx.MAX_HEARTS && ctx.pickupFlip) {
-    ctx.pickupFlip = false;
-    spawnHeart();
-  } else {
-    ctx.pickupFlip = true;
-    spawnWeaponCrate();
-  }
+  // cycle crate, shield, heart with crate as every fallback, so crates
+  // stay the most common drop; shields and hearts only when useful
+  var slot = ctx.pickupCycle;
+  ctx.pickupCycle = (ctx.pickupCycle + 1) % 3;
+  if (slot === 1 && !ctx.shielded) { spawnShield(); return; }
+  if (slot === 2 && ctx.hearts < ctx.MAX_HEARTS) { spawnHeart(); return; }
+  spawnWeaponCrate();
 }
 
 function makePickupGroup(color) {
@@ -70,6 +69,20 @@ export function spawnHeart() {
   pickups.push({ group: g, kind: "heart", t: 0, remove: false });
 }
 
+export function spawnShield() {
+  var g = makePickupGroup(0x4d9fff);
+  var bubble = new THREE.Mesh(new THREE.SphereGeometry(0.55, 12, 10),
+    new THREE.MeshBasicMaterial({ color: 0x7fc4ff, transparent: true, opacity: 0.4,
+      blending: THREE.AdditiveBlending, depthWrite: false }));
+  g.add(bubble);
+  var core = new THREE.Mesh(new THREE.SphereGeometry(0.22, 8, 8),
+    new THREE.MeshBasicMaterial({ color: 0xbfe4ff }));
+  g.add(core);
+  g.position.set((Math.random() - 0.5) * 24, 4 + Math.random() * 5, -95);
+  ctx.scene.add(g);
+  pickups.push({ group: g, kind: "shield", t: 0, remove: false });
+}
+
 export function updatePickups(dt) {
   for (var i = 0; i < pickups.length; i++) {
     var p = pickups[i];
@@ -99,6 +112,21 @@ function collectPickup(p) {
     updateHearts();
     sfx.heart();
     showBanner("+1 HEART!", "", false);
+    return;
+  }
+  if (p.kind === "shield") {
+    if (!ctx.shielded) {
+      ctx.shielded = true;
+      updateShield();
+      sfx.shieldUp();
+      showBanner("SHIELD UP!", "BLOCKS ONE HIT!", false);
+    } else {
+      // rare edge: grabbed a shield while shielded; pays like a
+      // capped crate so a pickup is never worthless
+      ctx.score += 150; updateScore();
+      sfx.chime();
+      showBanner("SHIELD FULL!", "+150", false);
+    }
     return;
   }
   var next = nextTierIndex();

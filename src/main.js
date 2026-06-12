@@ -12,8 +12,8 @@ import * as THREE from "three";
    ===================================================================== */
 
 import { sfx } from "./audio.js";
-import { initUI, updateHearts, updateScore, $, elWave, elBossWrap,
-         elDmg, elFlash, elHearts, elHint,
+import { initUI, updateHearts, updateScore, updateShield, $, elWave,
+         elBossWrap, elDmg, elFlash, elHearts, elHint, elShieldFlash,
          scrMenu, scrOver, scrPause } from "./ui.js";
 import { initEffects, updateEffects, shake, spawnExplosion,
          shards, explosions, sparks } from "./effects.js";
@@ -40,8 +40,9 @@ var ctx = {
   elapsed: 0,
   score: 0, best: 0, hearts: 3, wave: 0,
   MAX_HEARTS: 5,   // start with 3, earn up to 5
-  kills: 0, killsSincePickup: 0, pickupFlip: false,
+  kills: 0, killsSincePickup: 0, pickupCycle: 0,
   comboChain: 0, comboMult: 1, comboFrac: 0,
+  shielded: false, shieldFade: 0,
   invulnT: 0, hurtT: 0, dmgFade: 0, flashFade: 0,
   shakeT: 0, shakeAmp: 0,
   pendingNextWaveAt: null,
@@ -72,6 +73,18 @@ var ctx = {
 /* ---------------- PLAYER ---------------- */
 function damagePlayer() {
   if (ctx.invulnT > 0 || ctx.state !== "PLAYING") return;
+  if (ctx.shielded) {
+    // shield absorbs the hit: no heart loss, no combo reset, none of
+    // the got-hit cues (hurtT, dmgFade); brief invuln so one volley
+    // cannot pop the shield and a heart in the same burst
+    ctx.shielded = false;
+    ctx.invulnT = 0.9;
+    ctx.shieldFade = 1.0;
+    shake(0.45, 0.35);
+    sfx.shieldBreak();
+    updateShield();
+    return;
+  }
   ctx.hearts--;
   comboReset();
   ctx.invulnT = 1.3;
@@ -99,13 +112,14 @@ function resetGame() {
   ctx.bossQueueDelay = [];
   ctx.spawnQueue = [];
   ctx.score = 0; ctx.hearts = 3; ctx.wave = 0;
-  ctx.kills = 0; ctx.killsSincePickup = 0; ctx.pickupFlip = false;
+  ctx.kills = 0; ctx.killsSincePickup = 0; ctx.pickupCycle = 0;
+  ctx.shielded = false; ctx.shieldFade = 0;
   ctx.invulnT = 0; ctx.hurtT = 0; ctx.dmgFade = 0; ctx.flashFade = 0; ctx.fireT = 0;
   ctx.aimX = 0; ctx.aimY = 0;
   setWeaponTier(0);
   comboReset();
   resetSuperBlast();
-  updateHearts(); updateScore();
+  updateHearts(); updateScore(); updateShield();
   elWave.textContent = "WAVE 1";
   ctx.pendingNextWaveAt = ctx.elapsed + 0.9;
 }
@@ -178,6 +192,7 @@ function animate() {
 
   if (ctx.dmgFade > 0) { ctx.dmgFade = Math.max(0, ctx.dmgFade - dt * 1.4); elDmg.style.opacity = ctx.dmgFade; }
   if (ctx.flashFade > 0) { ctx.flashFade = Math.max(0, ctx.flashFade - dt * 1.2); elFlash.style.opacity = ctx.flashFade; }
+  if (ctx.shieldFade > 0) { ctx.shieldFade = Math.max(0, ctx.shieldFade - dt * 1.8); elShieldFlash.style.opacity = ctx.shieldFade; }
   // hurtT, not invulnT: the blink is the got-hit cue and must not play
   // during the friendly i-frames a SUPER BLAST grants
   elHearts.style.opacity = (ctx.hurtT > 0 && Math.floor(ctx.elapsed * 10) % 2 === 0) ? 0.35 : 1;

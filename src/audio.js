@@ -82,6 +82,14 @@ export var sfx = {
   hurt:   function () { tone(300, 80, 0.32, "square", 0.5); },
   chime:  function () { tone(660, 660, 0.1, "sine", 0.4);
                         tone(990, 990, 0.14, "sine", 0.4, 0.09); },
+  /* bubble up: wet rising blips */
+  shieldUp: function () { tone(420, 700, 0.09, "sine", 0.4);
+                          tone(560, 900, 0.09, "sine", 0.4, 0.08);
+                          tone(700, 1200, 0.14, "sine", 0.42, 0.16); },
+  /* bubble pop and fizzle, friendly not punishing */
+  shieldBreak: function () { tone(900, 240, 0.08, "square", 0.45);
+                             noiseHit(0.25, 0.4, 3200, 0.02);
+                             tone(500, 120, 0.18, "sine", 0.35, 0.06); },
   heart:  function () { tone(520, 520, 0.1, "sine", 0.42);
                         tone(780, 780, 0.1, "sine", 0.42, 0.1);
                         tone(1040, 1040, 0.16, "sine", 0.42, 0.2); },
