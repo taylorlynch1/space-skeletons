@@ -51,8 +51,11 @@ never from harder execution. He should never feel punished.
   SKULLSWORD, DREAD KING MARROW, THE BONE EMPEROR.
 - Enemy roster: Slasher (wave 1+), Gunner (wave 2+), Brute (wave 6+,
   eyepatch, iron plate, 30 pts), Sniper (wave 8+, purple bolts, 25 pts).
-- Ladder monotonicity: every weapon tier must fire at least as fast
-  as, and look and sound at least as powerful as, the tier below it.
+- Ladder monotonicity: every weapon tier must feel like a clear
+  upgrade over the tier below it: stronger look, stronger sound, and
+  higher effective damage output against typical waves, with splash
+  counting. Raw fire rate may drop only when per-shot impact
+  unmistakably compensates, like the Plasma Cannon's heavy cadence.
   Any tier change gets checked against this before commit.
 - Skeleton kills play a randomized funny sound (bone xylophone, cartoon
   boing, or slide whistle). This is beloved. Keep it.
