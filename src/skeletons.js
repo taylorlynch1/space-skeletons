@@ -2,7 +2,7 @@
 import * as THREE from "three";
 import { sfx } from "./audio.js";
 import { spawnExplosion, spawnBones } from "./effects.js";
-import { updateScore, scorePop } from "./ui.js";
+import { updateScore, scorePop, showBanner } from "./ui.js";
 import { spawnAutoPickup } from "./pickups.js";
 import { comboKill } from "./combo.js";
 import { fireBolt, boltMatPurple } from "./weapons.js";
@@ -65,6 +65,9 @@ export function buildSharedParts() {
 
   M.bone   = new THREE.MeshPhongMaterial({ color: 0xe9e3d2, flatShading: true, shininess: 4 });
   M.boneBoss = new THREE.MeshPhongMaterial({ color: 0xcfc3a6, flatShading: true, shininess: 4 });
+  M.boneGold = new THREE.MeshPhongMaterial({ color: 0xf5c84a, emissive: 0x8a6a14,
+              emissiveIntensity: 0.5, flatShading: true, shininess: 30 });
+  M.goldPupil = new THREE.MeshBasicMaterial({ color: 0xfff2b0 });
   M.dark   = new THREE.MeshPhongMaterial({ color: 0x15131c, flatShading: true, shininess: 4 });
   M.iron   = new THREE.MeshPhongMaterial({ color: 0x3a3f4c, flatShading: true, shininess: 4 });
   M.hat    = new THREE.MeshPhongMaterial({ color: 0x221c2c, flatShading: true, shininess: 4 });
@@ -90,11 +93,11 @@ export function buildSharedParts() {
 }
 
 /* Build one skeleton pirate.
-   type: "slasher" | "gunner" | "brute" | "sniper" | "boss" */
+   type: "slasher" | "gunner" | "brute" | "sniper" | "golden" | "boss" */
 export function makeSkeleton(type, scale) {
   var g = new THREE.Group();
   var isBoss = (type === "boss");
-  var bMat = isBoss ? M.boneBoss : M.bone;
+  var bMat = isBoss ? M.boneBoss : (type === "golden" ? M.boneGold : M.bone);
 
   function mesh(geo, mat, x, y, z) {
     var m = new THREE.Mesh(geo, mat);
@@ -115,7 +118,8 @@ export function makeSkeleton(type, scale) {
   mesh(G.skull,  bMat, 0, 3.0, 0);
   mesh(G.socket, M.dark, -0.2, 3.06, 0.42);
   mesh(G.socket, M.dark,  0.2, 3.06, 0.42);
-  var pupilMat = (type === "sniper") ? M.purple : M.red;
+  var pupilMat = (type === "sniper") ? M.purple :
+                 (type === "golden") ? M.goldPupil : M.red;
   mesh(isBoss ? G.pupilB : G.pupil, pupilMat, -0.2, 3.06, 0.52);
   mesh(isBoss ? G.pupilB : G.pupil, pupilMat,  0.2, 3.06, 0.52);
   var halos = null;
@@ -332,6 +336,47 @@ export function spawnSniper() {
   ctx.scene.add(e.group); ctx.enemies.push(e);
 }
 
+/* ---------------- GOLDEN SKELETON (M1 item 4) ----------------
+   Rare bonus chase: fast darting flier at parked-shooter depth, never
+   attacks, flees after GOLDEN_WINDOW seconds. Blast-immune BY DESIGN
+   (map 6.13): a SUPER BLAST scares him off instead of paying a free
+   multiplied 100. Reachability (worst case INCLUDING the z weave,
+   which brings him to z -40): x within 23 at dz 46 needs 0.46 rad yaw
+   vs the 0.85 limit, pitch 0.14 vs 0.55. Tuning approved 2026-06-12
+   as starting values. */
+export var GOLDEN_WINDOW = 8;   // seconds on screen before he flees
+
+export function spawnGolden() {
+  var sk = makeSkeleton("golden", 1);
+  var e = {
+    kind: "golden", parts: sk, group: sk.group,
+    hp: 2,
+    baseY: 4.5 + Math.random() * 4,
+    targetZ: -45 - Math.random() * 20,
+    homeX: (Math.random() - 0.5) * 36,
+    t: Math.random() * 10, phase: Math.random() * 6,
+    windowT: GOLDEN_WINDOW, fleeing: false, fleeSpeed: 30,
+    arrived: false, dartT: 0,
+    scale: 1, pts: 100, remove: false
+  };
+  e.group.position.set((Math.random() - 0.5) * 50, e.baseY, -150);
+  ctx.scene.add(e.group); ctx.enemies.push(e);
+  showBanner("GOLDEN SKELETON!", "CATCH HIM QUICK!", false);
+  sfx.goldenSpawn();
+}
+
+/* The chase ends: the timer ran out (teased) or a SUPER BLAST scared
+   him off (no tease, the kid did the right thing). */
+export function fleeGolden(e, teased) {
+  if (e.fleeing || e.remove) return;
+  e.fleeing = true;
+  sfx.goldenFlee();
+  if (teased) {
+    enemyCenter(e, ctx.tmpV);
+    scorePop(ctx.tmpV, "TOO SLOW!", false);
+  }
+}
+
 export function enemyCenter(e, out) {
   out.copy(e.group.position); out.y += 1.7 * e.scale; return out;
 }
@@ -347,7 +392,8 @@ export function killEnemy(e, scored) {
     ctx.chargeSuper(1);
     var pts = e.pts * ctx.comboMult;
     ctx.score += pts; updateScore();
-    scorePop(ctx.tmpV, "+" + pts, false);
+    scorePop(ctx.tmpV, "+" + pts, e.kind === "golden");
+    if (e.kind === "golden") sfx.kaching();
     ctx.kills++; ctx.killsSincePickup++;
     if (ctx.killsSincePickup >= 9) { ctx.killsSincePickup = 0; spawnAutoPickup(); }
   }
@@ -374,7 +420,39 @@ export function updateEnemies(dt) {
       e.parts.flames[f].scale.y = fy;
     }
 
-    if (melee) {
+    if (e.kind === "golden") {
+      if (e.fleeing) {
+        e.fleeSpeed += dt * 90;
+        g.position.z -= e.fleeSpeed * dt;
+        g.position.y += dt * 2.5;
+        g.lookAt(g.position.x, g.position.y, g.position.z - 10);
+        if (g.position.z < -170) { e.remove = true; ctx.scene.remove(e.group); }
+      } else {
+        e.windowT -= dt;
+        if (e.windowT <= 0) fleeGolden(e, true);
+        if (!e.arrived && g.position.z < e.targetZ) {
+          // fast entry down the canyon to the dart zone
+          g.position.z += 55 * dt;
+          g.position.x += (e.homeX - g.position.x) * dt * 2.0;
+          g.position.y = e.baseY;
+        } else {
+          // dart: quick two-frequency weave, never attacks. Arrival is
+          // LATCHED because the z weave dips below targetZ by design;
+          // an unlatched gate re-triggers the entry branch and he
+          // stutters. Amplitudes ease in over 0.5s and the position
+          // follows the weave target, so the switch frame is
+          // continuous (no pop, the aim assist never drops him).
+          e.arrived = true;
+          e.dartT += dt;
+          var amp = Math.min(1, e.dartT / 0.5);
+          var gk = Math.min(1, dt * 8);
+          g.position.x += (e.homeX + Math.sin(e.t * 2.6 + e.phase) * 5 * amp - g.position.x) * gk;
+          g.position.y += (e.baseY + Math.sin(e.t * 3.4 + e.phase) * 1.5 * amp - g.position.y) * gk;
+          g.position.z += (e.targetZ + Math.sin(e.t * 1.7 + e.phase) * 5 * amp - g.position.z) * gk;
+        }
+        g.lookAt(ctx.PLAYER_POS.x, g.position.y, ctx.PLAYER_POS.z);
+      }
+    } else if (melee) {
       if (!e.slashing) {
         ctx.tmpV2.copy(ctx.PLAYER_POS).sub(g.position).normalize();
         g.position.addScaledVector(ctx.tmpV2, e.speed * dt);

@@ -13,7 +13,7 @@
    snowball. */
 import * as THREE from "three";
 import { sfx } from "./audio.js";
-import { killEnemy, enemyCenter } from "./skeletons.js";
+import { killEnemy, enemyCenter, fleeGolden } from "./skeletons.js";
 import { hitBoss } from "./boss.js";
 import { bolts } from "./weapons.js";
 import { spawnSpark, spawnExplosion, shake } from "./effects.js";
@@ -81,7 +81,12 @@ export function fireSuperBlast() {
   var i;
   var alive = [];
   for (i = 0; i < ctx.enemies.length; i++) {
-    if (!ctx.enemies[i].remove) alive.push(ctx.enemies[i]);
+    var en = ctx.enemies[i];
+    if (en.remove) continue;
+    // golden skeleton is blast-immune BY DESIGN (map 6.13): the blast
+    // scares him off instead of paying a free multiplied 100
+    if (en.kind === "golden") { fleeGolden(en, false); continue; }
+    alive.push(en);
   }
   alive.sort(function (a, b) {
     return a.group.position.distanceTo(ctx.PLAYER_POS) -

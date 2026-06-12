@@ -109,6 +109,18 @@ export var sfx = {
   heartbeat: function () { tone(58, 50, 0.1, "sine", 0.3);
                            tone(52, 46, 0.12, "sine", 0.26, 0.16); },
   waveUp: function () { tone(520, 820, 0.14, "sine", 0.35); },
+  /* golden skeleton arrives: bright twinkle, look up! */
+  goldenSpawn: function () { tone(1320, 1320, 0.07, "sine", 0.35);
+                             tone(1760, 1760, 0.07, "sine", 0.35, 0.07);
+                             tone(2200, 2200, 0.12, "sine", 0.4, 0.14);
+                             tone(1100, 2200, 0.18, "sine", 0.22, 0.2); },
+  /* golden skeleton escapes: cheeky doppler whistle away */
+  goldenFlee: function () { tone(1500, 400, 0.5, "sine", 0.4);
+                            tone(900, 200, 0.4, "sine", 0.25, 0.08); },
+  /* golden kill: coin ka-ching layered over the regular bonk */
+  kaching: function () { tone(1980, 1980, 0.08, "square", 0.3);
+                         tone(2640, 2640, 0.22, "square", 0.35, 0.06);
+                         tone(3520, 3520, 0.3, "sine", 0.3, 0.12); },
   /* rising triad, pitched higher per combo tier (lv 2, 3, 4) */
   comboUp: function (lv) {
     var b = 520 * Math.pow(1.26, lv - 2);

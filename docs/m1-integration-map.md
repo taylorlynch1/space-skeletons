@@ -221,11 +221,19 @@ and ownership boundaries are stable.
     Hearts blink on ctx.hurtT (set only by real damage), not invulnT,
     so blast i-frames never show the got-hit cue.
 13. Golden Skeleton (M1 item 4) vs SUPER BLAST, flagged by Taylor
-    2026-06-12: the blast kills EVERY active enemy, which would hand
-    out a free multiplied 100 point award for a rare fleeing target
-    designed to be chased. Item 4's plan MUST decide whether the
-    Golden Skeleton is blast-immune (for example it flees or despawns
-    instead of dying) before merge.
+    2026-06-12. RESOLVED same day, approved: blast-IMMUNE. The blast
+    cascade in fireSuperBlast skips kind "golden" and calls
+    fleeGolden(e, false) instead, so the blast scares him off with the
+    flee whistle and no TOO SLOW tease. Splash damage can still kill
+    him (an earned shot). Tunables: GOLDEN_CHANCE 0.35 in waves.js,
+    GOLDEN_WINDOW 8 and hp 2 in skeletons.js. He never attacks. He
+    can extend wave end by his spawn delay (up to 7s) plus his window
+    (8s) plus about 1.4s of flee travel, roughly 16s worst case from
+    wave start, during which the screen is otherwise empty and
+    harmless; that stall IS the chase. Reachability worst case
+    including the z weave (he reaches z -40): x within 23 at dz 46
+    needs 0.46 rad yaw vs the 0.85 limit and 0.14 pitch vs 0.55
+    (check passed).
 14. Medals (M1 item 5) vs shield bubble: medals are graded by hits
     taken. Item 5's plan MUST decide whether damage blocked by an
     active bubble counts as a hit taken. Blocked hits never reach

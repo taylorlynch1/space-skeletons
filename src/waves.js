@@ -1,12 +1,15 @@
 /* ---------------- WAVES ---------------- */
 import { sfx } from "./audio.js";
 import { showBanner, elWave } from "./ui.js";
-import { spawnSlasher, spawnGunner, spawnBrute, spawnSniper } from "./skeletons.js";
+import { spawnSlasher, spawnGunner, spawnBrute, spawnSniper,
+         spawnGolden } from "./skeletons.js";
 import { spawnBoss } from "./boss.js";
 import { spawnWeaponCrate } from "./pickups.js";
 import { spawnExplosion } from "./effects.js";
 
 var ctx;
+
+var GOLDEN_CHANCE = 0.35;   // of non-boss waves from wave 2, max one
 
 export function initWaves(c) { ctx = c; }
 
@@ -41,6 +44,11 @@ export function beginWave(n) {
   for (i = 0; i < list.length; i++) {
     ctx.spawnQueue.push({ at: ctx.elapsed + 0.8 + i * 0.7, type: list[i] });
   }
+  // golden skeleton: rare bonus chase, arrives mid-wave so his banner
+  // and twinkle never collide with the wave banner
+  if (ctx.wave >= 2 && Math.random() < GOLDEN_CHANCE) {
+    ctx.spawnQueue.push({ at: ctx.elapsed + 4 + Math.random() * 3, type: "golden" });
+  }
 }
 
 export function updateWaveFlow(dt) {
@@ -51,6 +59,7 @@ export function updateWaveFlow(dt) {
       else if (s.type === "gunner") spawnGunner();
       else if (s.type === "brute") spawnBrute();
       else if (s.type === "sniper") spawnSniper();
+      else if (s.type === "golden") spawnGolden();
       else if (s.type === "boss") spawnBoss();
     }
   }
